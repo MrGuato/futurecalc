@@ -1,0 +1,73 @@
+<!doctype html>
+const savingsApy=Math.max(0,parseFloat($('savingsApy').value||0))/100;
+const monthlyExpenses=parseFloat($('monthlyExpenses').value||0);
+const redirect=$('redirect').checked;
+
+
+$('status').textContent='Calculating…';
+if(gross<=0||(investPct+savePct)<=0||years<=0||periodsPerYear<=0){$('status').textContent='Enter paycheck, %s, and years'; return null;}
+
+
+const efGoal=monthlyExpenses>0?monthlyExpenses*6:0;
+const totalPeriods=years*periodsPerYear;
+const rInvest=Math.pow(1+annualReturn,1/periodsPerYear)-1;
+const rSave=Math.pow(1+savingsApy,1/periodsPerYear)-1;
+
+
+let investBal=0, saveBal=0, efReachedAt=Infinity;
+const investSeries=[], saveSeries=[], labels=[];
+
+
+for(let p=0;p<=totalPeriods;p++){
+investSeries.push(investBal); saveSeries.push(saveBal);
+if(p%periodsPerYear===0) labels.push(`Year ${p/periodsPerYear}`);
+if(p===totalPeriods) break;
+
+
+let investContrib=investPct*gross; let saveContrib=savePct*gross;
+if(efGoal>0 && saveBal>=efGoal-0.005){
+if(efReachedAt===Infinity) efReachedAt=p;
+saveContrib=0; if(redirect) investContrib+=savePct*gross;
+}
+investBal=investBal*(1+rInvest)+investContrib;
+saveBal=Math.min(efGoal>0?efGoal:Infinity, saveBal*(1+rSave)+saveContrib);
+}
+
+
+$('status').textContent='Done';
+return {investBal, saveBal, efGoal, efReachedAt, labels, investSeries, saveSeries, periodsPerYear, years};
+}
+
+
+let chart;
+function render(res){
+if(!res) return;
+$('investTotal').textContent=fmt(res.investBal);
+$('saveTotal').textContent=fmt(res.saveBal);
+$('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
+$('timeToEF').innerHTML=(res.efGoal>0)?(res.efReachedAt===Infinity?'<span>Not reached</span>':`<span>${monthsWords(Math.round(res.efReachedAt*12/res.periodsPerYear))}</span>`):'—';
+
+
+$('efExplain').textContent='6 months of your essential monthly expenses';
+$('investExplain').textContent=`${$('investPct').value}%`;
+$('retExplain').textContent=`${$('annualReturn').value}%`;
+$('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
+
+
+const yearlyInvest=[], yearlySave=[];
+for(let y=0;y<=res.years;y++){const i=y*res.periodsPerYear; yearlyInvest.push(res.investSeries[i]); yearlySave.push(res.saveSeries[i]);}
+
+
+const data={labels:res.labels,datasets:[{label:'Investing balance',data:yearlyInvest},{label:'Savings balance',data:yearlySave}]};
+if(chart) chart.destroy();
+const ctx=document.getElementById('chart').getContext('2d');
+chart=new Chart(ctx,{type:'line',data,options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:getComputedStyle(document.documentElement).getPropertyValue('--muted') || '#4a5a70'}},tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}},scales:{x:{ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--muted')},grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--line')}},y:{ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getComputedStyle(document.documentElement).getPropertyValue('--line')}} ,elements:{point:{radius:0}}}});
+}
+
+
+document.getElementById('run').addEventListener('click',()=>render(calculate()));
+document.getElementById('reset').addEventListener('click',()=>{localStorage.removeItem('futurecalc_inputs'); location.reload();});
+(function autorun(){ if($('gross').value && $('monthlyExpenses').value){ render(calculate()); } })();
+</script>
+</body>
+</html>
