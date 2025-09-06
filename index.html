@@ -1,386 +1,337 @@
 <!doctype html>
 <html lang="en">
 <head>
- <meta charset="utf-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1" />
- <title>FutureCalc — Paycheck to Freedom</title>
- <meta name="description" content="FutureCalc helps professionals and millennials split each paycheck, build a 6‑month emergency fund, and see long‑term compounding." />
- <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
- <link href="https://fonts.cdnfonts.com/css/inter" rel="stylesheet">
- <style>
- :root{
-/* Light theme */
---bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70; --accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
- }
-@media (prefers-color-scheme: dark){
- :root{ --bg:#0b0f14; --card:#101722; --ink:#e7eef8; --muted:#9fb2cc; --accent:#6ea8ff; --accent2:#58d38a; --line:#1b2432; --chip:#0f1622; }
- }
- *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
-a{color:var(--accent);text-decoration:none}
-header{padding:28px 18px 8px;text-align:center}
-header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
-header p{margin:0;color:var(--muted)}
- .wrap{max-width:1100px;margin:0 auto;padding:18px}
- .grid{display:grid;gap:16px;grid-template-columns:1fr}
-@media(min-width:960px){.grid{grid-template-columns:380px 1fr}}
- .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
- .card h2{margin:0 0 12px;font-size:18px}
-label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
-input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;color:#0e1621;outline:none}
-@media(prefers-color-scheme:dark){input,select{background:#0e141d;color:#e7eef8}}
-input[type="checkbox"]{width:auto;transform:translateY(2px)}
- .row{display:flex;gap:10px}
- .row > *{flex:1}
- .help{font-size:12px;color:var(--muted);margin-top:4px}
- .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
- .btn.secondary{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
- .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
-@media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
- .stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
- .stat .k{font-size:12px;color:var(--muted)}
- .stat .v{font-size:18px;margin-top:4px}
- .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px;color:var(--muted)}
- .oplist{margin:10px 0 0;padding-left:18px}
- .oplist li{margin:6px 0}
-canvas{width:100%;height:340px}
- .divider{height:1px;background:var(--line);margin:14px 0}
- .footer{color:var(--muted);font-size:12px;margin-top:10px}
- .flex{display:flex;align-items:center;gap:10px}
- .tag{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
- .right{display:flex;justify-content:space-between;flex-wrap:wrap}
- .breakdown{display:grid;gap:8px;margin-top:12px}
- .breakdown-item{display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--chip);border-radius:8px}
- .breakdown-label{font-size:13px;color:var(--muted)}
- .breakdown-amount{font-weight:600}
- </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FutureCalc — Paycheck to Freedom</title>
+<meta name="description" content="FutureCalc helps professionals and millennials split each paycheck, build a 6-month emergency fund, and see long-term compounding." />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
+    --accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0b0f14; --card:#101722; --ink:#e7eef8; --muted:#9fb2cc; --accent:#6ea8ff; --accent2:#58d38a; --line:#1b2432; --chip:#0f1622; }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
+  header{padding:28px 18px 8px;text-align:center}
+  header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
+  header p{margin:0;color:var(--muted)}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px}
+  .grid{display:grid;gap:16px;grid-template-columns:1fr}
+  @media(min-width:960px){.grid{grid-template-columns:380px 1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .card h2{margin:0 0 12px;font-size:18px}
+  label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
+  input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;color:#0e1621;outline:none}
+  @media(prefers-color-scheme:dark){input,select{background:#0e141d;color:#e7eef8}}
+  input[type="checkbox"]{width:auto;transform:translateY(2px)}
+  .row{display:flex;gap:10px}
+  .row > *{flex:1}
+  .help{font-size:12px;color:var(--muted);margin-top:4px}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
+  .btn.secondary{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+  @media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
+  .stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .stat .k{font-size:12px;color:var(--muted)}
+  .stat .v{font-size:18px;margin-top:4px}
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+  .oplist{margin:10px 0 0;padding-left:18px}
+  .oplist li{margin:6px 0}
+  canvas{width:100%;height:340px}
+  .divider{height:1px;background:var(--line);margin:14px 0}
+  .footer{color:var(--muted);font-size:12px;margin-top:10px}
+  .flex{display:flex;align-items:center;gap:10px}
+  .tag{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+  .right{display:flex;justify-content:space-between;flex-wrap:wrap}
+</style>
 </head>
 <body>
 <header>
- <h1>FutureCalc</h1>
- <p>Split your paycheck, build a 6‑month emergency fund, and watch compounding work for you.</p>
+  <h1>FutureCalc</h1>
+  <p>Split your paycheck, build a 6-month emergency fund, and watch compounding work for you.</p>
 </header>
+
 <div class="wrap">
- <div class="grid">
- <section class="card" id="inputs">
-   <h2>Income & Goals</h2>
-   
-   <label for="income">Monthly Take-Home Pay</label>
-   <input type="number" id="income" value="5000" step="100">
-   <div class="help">Your net monthly income after taxes</div>
+  <div class="grid">
+    <section class="card" id="inputs">
+      <h2>1) Your Inputs</h2>
 
-   <label for="expenses">Monthly Essential Expenses</label>
-   <input type="number" id="expenses" value="3000" step="100">
-   <div class="help">Rent, utilities, groceries, minimum debt payments</div>
+      <label>Gross paycheck amount (before taxes)</label>
+      <input id="gross" type="number" min="0" step="0.01" placeholder="e.g., 2,000" />
 
-   <label for="emergency-target">Emergency Fund Target (months)</label>
-   <input type="number" id="emergency-target" value="6" min="3" max="12">
-   <div class="help">How many months of expenses to save</div>
+      <div class="row">
+        <div>
+          <label>Pay frequency</label>
+          <select id="frequency">
+            <option value="52">Weekly (52/yr)</option>
+            <option value="26" selected>Bi-weekly (26/yr)</option>
+            <option value="24">Semi-monthly (24/yr)</option>
+            <option value="12">Monthly (12/yr)</option>
+          </select>
+        </div>
+        <div>
+          <label>Projection length (years)</label>
+          <input id="years" type="number" min="1" max="60" value="30" />
+        </div>
+      </div>
 
-   <div class="divider"></div>
+      <div class="row">
+        <div>
+          <label>Investing — % of each paycheck</label>
+          <input id="investPct" type="number" min="0" max="100" step="0.1" value="15" />
+          <div class="help">Long-term investing (e.g., index funds). Default example: 15%.</div>
+        </div>
+        <div>
+          <label>Savings — % of each paycheck</label>
+          <input id="savePct" type="number" min="0" max="100" step="0.1" value="10" />
+          <div class="help">Cash for emergencies in a high-yield savings account.</div>
+        </div>
+      </div>
 
-   <h2>Investment Strategy</h2>
-   
-   <label for="emergency-rate">Emergency Fund Return (%)</label>
-   <input type="number" id="emergency-rate" value="4.5" step="0.1" min="0" max="10">
-   <div class="help">High-yield savings account rate</div>
+      <div class="row">
+        <div>
+          <label>Expected annual return (investing)</label>
+          <input id="annualReturn" type="number" min="0" max="20" step="0.1" value="9" />
+          <div class="help">Historical-style assumption (not guaranteed).</div>
+        </div>
+        <div>
+          <label>Savings APY</label>
+          <input id="savingsApy" type="number" min="0" max="10" step="0.1" value="0.5" />
+          <div class="help">Cash interest rate for savings.</div>
+        </div>
+      </div>
 
-   <label for="investment-rate">Investment Return (%)</label>
-   <input type="number" id="investment-rate" value="7" step="0.1" min="3" max="15">
-   <div class="help">Expected annual return (S&P 500 average ~10%)</div>
+      <div class="row">
+        <div>
+          <label>Your average monthly living expenses</label>
+          <input id="monthlyExpenses" type="number" min="0" step="1" placeholder="e.g., 2,500" />
+          <div class="help">Rent/mortgage, utilities, groceries, insurance, transportation, and minimum debt payments.</div>
+        </div>
+        <div>
+          <label>Emergency fund target</label>
+          <div class="flex"><span class="pill">6 × monthly expenses</span></div>
+          <div class="help">Recommended cushion for job loss or big surprises.</div>
+        </div>
+      </div>
 
-   <label for="investment-split">Investment Allocation</label>
-   <div class="row">
-     <div>
-       <input type="number" id="emergency-percent" value="50" min="0" max="100">
-       <div class="help">Emergency %</div>
-     </div>
-     <div>
-       <input type="number" id="investment-percent" value="50" min="0" max="100">
-       <div class="help">Investment %</div>
-     </div>
-   </div>
-   
-   <button class="btn" onclick="calculate()">Calculate My Future</button>
- </section>
+      <div class="divider"></div>
 
- <section class="card">
-   <h2>Your Financial Breakdown</h2>
-   
-   <div class="stats">
-     <div class="stat">
-       <div class="k">Available to Save</div>
-       <div class="v" id="available">$2,000</div>
-     </div>
-     <div class="stat">
-       <div class="k">Emergency Target</div>
-       <div class="v" id="emergency-goal">$18,000</div>
-     </div>
-     <div class="stat">
-       <div class="k">Time to Goal</div>
-       <div class="v" id="time-to-goal">9 months</div>
-     </div>
-     <div class="stat">
-       <div class="k">Monthly Investment</div>
-       <div class="v" id="monthly-investment">$1,000</div>
-     </div>
-   </div>
+      <div class="flex">
+        <input id="redirect" type="checkbox" checked />
+        <label for="redirect">After emergency fund is full, redirect the Savings % to Investing</label>
+      </div>
 
-   <div class="breakdown">
-     <div class="breakdown-item">
-       <span class="breakdown-label">Monthly Take-Home</span>
-       <span class="breakdown-amount" id="breakdown-income">$5,000</span>
-     </div>
-     <div class="breakdown-item">
-       <span class="breakdown-label">Essential Expenses</span>
-       <span class="breakdown-amount" id="breakdown-expenses">$3,000</span>
-     </div>
-     <div class="breakdown-item">
-       <span class="breakdown-label">Emergency Fund Contribution</span>
-       <span class="breakdown-amount" id="breakdown-emergency">$1,000</span>
-     </div>
-     <div class="breakdown-item">
-       <span class="breakdown-label">Investment Contribution</span>
-       <span class="breakdown-amount" id="breakdown-invest">$1,000</span>
-     </div>
-     <div class="breakdown-item">
-       <span class="breakdown-label">Remaining for Lifestyle</span>
-       <span class="breakdown-amount" id="breakdown-remaining">$0</span>
-     </div>
-   </div>
+      <div class="divider"></div>
 
-   <div class="divider"></div>
+      <div class="flex" style="gap:8px;flex-wrap:wrap">
+        <button class="btn" id="run">Calculate</button>
+        <button class="btn secondary" id="reset">Reset</button>
+        <span class="tag" id="status">Ready</span>
+      </div>
+    </section>
 
-   <h2>10-Year Projection</h2>
-   <canvas id="chart"></canvas>
+    <section class="card">
+      <h2>2) Results & Insights</h2>
 
-   <div class="stats">
-     <div class="stat">
-       <div class="k">Emergency Fund (10 years)</div>
-       <div class="v" id="emergency-10yr">$22,000</div>
-     </div>
-     <div class="stat">
-       <div class="k">Investment Portfolio</div>
-       <div class="v" id="investment-10yr">$180,000</div>
-     </div>
-     <div class="stat">
-       <div class="k">Total Net Worth</div>
-       <div class="v" id="total-10yr">$202,000</div>
-     </div>
-     <div class="stat">
-       <div class="k">Compound Interest Gained</div>
-       <div class="v" id="interest-gained">$82,000</div>
-     </div>
-   </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Investing total (end of horizon)</div>
+          <div class="v" id="investTotal">$0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Savings balance (end of horizon)</div>
+          <div class="v" id="saveTotal">$0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Emergency fund goal</div>
+          <div class="v" id="efGoal">$0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Time to reach emergency fund</div>
+          <div class="v" id="timeToEF">—</div>
+        </div>
+      </div>
 
-   <div class="footer">
-     <p>Calculations assume consistent monthly contributions and compound interest. Actual returns may vary. This is for educational purposes only and not financial advice.</p>
-   </div>
- </section>
- </div>
+      <div class="divider"></div>
+
+      <div class="right">
+        <div class="pill">Order of Operations</div>
+        <div class="pill">Assumes consistent contributions & returns</div>
+      </div>
+
+      <ol class="oplist" id="ops">
+        <li><strong>Build your emergency fund</strong> to <span id="efExplain">6 months of expenses</span>. Keep this in high-yield savings.</li>
+        <li><strong>Invest</strong> <span id="investExplain">15%</span> of each paycheck into diversified, low-cost funds. Default return shown is <span id="retExplain">9%</span> yearly.</li>
+        <li><strong>After your emergency fund is full</strong>, <span id="redirExplain">redirect the Savings % to Investing</span> to accelerate compounding.</li>
+      </ol>
+
+      <div class="divider"></div>
+
+      <div style="position:relative;height:360px">
+        <canvas id="chart"></canvas>
+      </div>
+
+      <p class="footer">
+        <strong>What is “6 months of living expenses”?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal: a buffer for layoffs, medical bills, or major repairs.
+      </p>
+      <p class="footer">
+        Educational tool only. Returns aren’t guaranteed; personal situations vary.
+      </p>
+    </section>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 <script>
-let chart;
+  // Utilities
+  const $ = (id)=>document.getElementById(id);
+  const fmt = (n)=> n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+  const monthsWords = (p)=>{
+    const y=Math.floor(p/12), m=p%12;
+    if (p===Infinity) return 'Not reached';
+    if (y===0) return `${m} month${m!==1?'s':''}`;
+    if (m===0) return `${y} year${y!==1?'s':''}`;
+    return `${y}y ${m}m`;
+  };
 
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+  // Persist inputs
+  const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
+  function saveInputs(){
+    const d={}; fields.forEach(f=>{const el=$(f); d[f]=el.type==='checkbox'?el.checked:el.value;});
+    localStorage.setItem('futurecalc_inputs',JSON.stringify(d));
+  }
+  function loadInputs(){
+    const raw=localStorage.getItem('futurecalc_inputs'); if(!raw) return;
+    try{const d=JSON.parse(raw);
+      fields.forEach(f=>{if(d[f]!==undefined){const el=$(f); if(el.type==='checkbox') el.checked=d[f]; else el.value=d[f];}});
+    }catch(e){}
+  }
+  fields.forEach(f=>{const el=$(f); el.addEventListener('input',saveInputs); el.addEventListener('change',saveInputs);});
+  loadInputs();
 
-function calculate() {
-  // Get input values
-  const income = parseFloat(document.getElementById('income').value) || 0;
-  const expenses = parseFloat(document.getElementById('expenses').value) || 0;
-  const emergencyTarget = parseFloat(document.getElementById('emergency-target').value) || 6;
-  const emergencyRate = parseFloat(document.getElementById('emergency-rate').value) / 100 || 0.045;
-  const investmentRate = parseFloat(document.getElementById('investment-rate').value) / 100 || 0.07;
-  const emergencyPercent = parseFloat(document.getElementById('emergency-percent').value) || 50;
-  const investmentPercent = parseFloat(document.getElementById('investment-percent').value) || 50;
+  // Core math
+  function calculate(){
+    const gross=parseFloat($('gross').value||0);
+    const periodsPerYear=parseInt($('frequency').value||26,10);
+    const years=parseInt($('years').value||30,10);
+    const investPct=Math.max(0,Math.min(100,parseFloat($('investPct').value||0)))/100;
+    const savePct=Math.max(0,Math.min(100,parseFloat($('savePct').value||0)))/100;
+    const annualReturn=Math.max(0,parseFloat($('annualReturn').value||0))/100;
+    const savingsApy=Math.max(0,parseFloat($('savingsApy').value||0))/100;
+    const monthlyExpenses=parseFloat($('monthlyExpenses').value||0);
+    const redirect=$('redirect').checked;
 
-  // Sync percentage inputs
-  document.getElementById('emergency-percent').value = emergencyPercent;
-  document.getElementById('investment-percent').value = 100 - emergencyPercent;
-
-  // Calculate available savings
-  const available = Math.max(0, income - expenses);
-  const emergencyGoal = expenses * emergencyTarget;
-  
-  // Calculate monthly allocations
-  const monthlyEmergency = (available * emergencyPercent) / 100;
-  const monthlyInvestment = (available * investmentPercent) / 100;
-  const remaining = available - monthlyEmergency - monthlyInvestment;
-
-  // Calculate time to emergency goal
-  let timeToGoal = monthlyEmergency > 0 ? Math.ceil(emergencyGoal / monthlyEmergency) : Infinity;
-  if (timeToGoal === Infinity) timeToGoal = "Never";
-  else timeToGoal = `${timeToGoal} months`;
-
-  // Update display
-  document.getElementById('available').textContent = formatCurrency(available);
-  document.getElementById('emergency-goal').textContent = formatCurrency(emergencyGoal);
-  document.getElementById('time-to-goal').textContent = timeToGoal;
-  document.getElementById('monthly-investment').textContent = formatCurrency(monthlyInvestment);
-
-  // Update breakdown
-  document.getElementById('breakdown-income').textContent = formatCurrency(income);
-  document.getElementById('breakdown-expenses').textContent = formatCurrency(expenses);
-  document.getElementById('breakdown-emergency').textContent = formatCurrency(monthlyEmergency);
-  document.getElementById('breakdown-invest').textContent = formatCurrency(monthlyInvestment);
-  document.getElementById('breakdown-remaining').textContent = formatCurrency(remaining);
-
-  // Calculate 10-year projections
-  const monthlyEmergencyRate = emergencyRate / 12;
-  const monthlyInvestmentRate = investmentRate / 12;
-  const months = 120; // 10 years
-
-  let emergencyBalance = 0;
-  let investmentBalance = 0;
-  const chartData = [];
-
-  for (let month = 0; month <= months; month++) {
-    if (month > 0) {
-      // Add monthly contributions
-      if (emergencyBalance < emergencyGoal) {
-        emergencyBalance += monthlyEmergency;
-      } else {
-        // Once emergency goal is reached, redirect to investments
-        investmentBalance += monthlyEmergency + monthlyInvestment;
-      }
-      
-      if (emergencyBalance < emergencyGoal) {
-        investmentBalance += monthlyInvestment;
-      }
-
-      // Apply compound interest
-      emergencyBalance *= (1 + monthlyEmergencyRate);
-      investmentBalance *= (1 + monthlyInvestmentRate);
-      
-      // Cap emergency fund at goal
-      if (emergencyBalance > emergencyGoal) {
-        const excess = emergencyBalance - emergencyGoal;
-        emergencyBalance = emergencyGoal;
-        investmentBalance += excess;
-      }
+    $('status').textContent='Calculating…';
+    if (gross<=0 || (investPct+savePct)<=0 || years<=0 || periodsPerYear<=0){
+      $('status').textContent='Enter paycheck, %s, and years';
+      return null;
     }
 
-    if (month % 12 === 0) { // Annual data points
-      chartData.push({
-        year: month / 12,
-        emergency: emergencyBalance,
-        investment: investmentBalance,
-        total: emergencyBalance + investmentBalance
-      });
+    const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
+    const totalPeriods = years * periodsPerYear;
+
+    const rInvest = Math.pow(1+annualReturn, 1/periodsPerYear)-1;
+    const rSave   = Math.pow(1+savingsApy,   1/periodsPerYear)-1;
+
+    let investBal=0, saveBal=0, efReachedAt=Infinity;
+    const investSeries=[], saveSeries=[], labels=[];
+
+    for (let p=0; p<=totalPeriods; p++){
+      investSeries.push(investBal);
+      saveSeries.push(saveBal);
+      if (p%periodsPerYear===0) labels.push(`Year ${p/periodsPerYear}`);
+      if (p===totalPeriods) break;
+
+      let investContrib = investPct * gross;
+      let saveContrib   = savePct * gross;
+
+      // Stop savings at goal; optionally redirect to investing
+      if (efGoal>0 && saveBal >= efGoal - 0.005){
+        if (efReachedAt===Infinity) efReachedAt = p;
+        saveContrib = 0;
+        if (redirect) investContrib += savePct * gross;
+      }
+
+      // Grow then add
+      investBal = investBal * (1 + rInvest) + investContrib;
+      saveBal   = Math.min(efGoal>0?efGoal:Infinity, saveBal * (1 + rSave) + saveContrib);
     }
+
+    $('status').textContent='Done';
+    return {investBal, saveBal, efGoal, efReachedAt, labels, investSeries, saveSeries, periodsPerYear, years};
   }
 
-  // Update 10-year stats
-  const totalContributions = (monthlyEmergency + monthlyInvestment) * months;
-  const totalValue = emergencyBalance + investmentBalance;
-  const interestGained = totalValue - totalContributions;
+  // Render
+  let chart;
+  function render(res){
+    if(!res) return;
+    $('investTotal').textContent = fmt(res.investBal);
+    $('saveTotal').textContent   = fmt(res.saveBal);
+    $('efGoal').textContent      = res.efGoal>0 ? fmt(res.efGoal) : 'Not set';
+    $('timeToEF').textContent    = (res.efGoal>0)
+      ? (res.efReachedAt===Infinity ? 'Not reached' : monthsWords(Math.round(res.efReachedAt * 12 / res.periodsPerYear)))
+      : '—';
 
-  document.getElementById('emergency-10yr').textContent = formatCurrency(emergencyBalance);
-  document.getElementById('investment-10yr').textContent = formatCurrency(investmentBalance);
-  document.getElementById('total-10yr').textContent = formatCurrency(totalValue);
-  document.getElementById('interest-gained').textContent = formatCurrency(interestGained);
+    $('efExplain').textContent   = '6 months of your essential monthly expenses';
+    $('investExplain').textContent = `${$('investPct').value}%`;
+    $('retExplain').textContent  = `${$('annualReturn').value}%`;
+    $('redirExplain').textContent= $('redirect').checked
+      ? 'this adds your Savings % to Investing automatically'
+      : 'you keep your Savings % in cash even after the fund is full';
 
-  // Update chart
-  updateChart(chartData);
-}
+    // Downsample to yearly points for clarity
+    const yearlyInvest=[], yearlySave=[];
+    for (let y=0; y<=res.years; y++){
+      const i = y * res.periodsPerYear;
+      yearlyInvest.push(res.investSeries[i]);
+      yearlySave.push(res.saveSeries[i]);
+    }
 
-function updateChart(data) {
-  const ctx = document.getElementById('chart').getContext('2d');
-  
-  if (chart) {
-    chart.destroy();
-  }
-
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map(d => `Year ${d.year}`),
+    const data = {
+      labels: res.labels,
       datasets: [
-        {
-          label: 'Emergency Fund',
-          data: data.map(d => d.emergency),
-          borderColor: '#16a34a',
-          backgroundColor: 'rgba(22, 163, 74, 0.1)',
-          fill: true,
-          tension: 0.4
-        },
-        {
-          label: 'Investments',
-          data: data.map(d => d.investment),
-          borderColor: '#2f6cf6',
-          backgroundColor: 'rgba(47, 108, 246, 0.1)',
-          fill: true,
-          tension: 0.4
-        },
-        {
-          label: 'Total Net Worth',
-          data: data.map(d => d.total),
-          borderColor: '#dc2626',
-          backgroundColor: 'transparent',
-          borderWidth: 3,
-          fill: false,
-          tension: 0.4
-        }
+        {label: 'Investing balance', data: yearlyInvest},
+        {label: 'Savings balance',   data: yearlySave},
       ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top',
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return formatCurrency(value);
-            }
-          }
-        }
-      },
-      interaction: {
-        intersect: false,
-        mode: 'index'
+    };
+
+    if (chart) chart.destroy();
+    const ctx = document.getElementById('chart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'line',
+      data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted') || '#4a5a70' } },
+          tooltip: { callbacks: { label: (c)=> `${c.dataset.label}: ${fmt(c.parsed.y||0)}` } }
+        },
+        scales: {
+          x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted') }, grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--line') } },
+          y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted'), callback: (v)=>'$'+Intl.NumberFormat().format(v) }, grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--line') } }
+        },
+        elements: { point: { radius: 0 } }
       }
-    }
-  });
-}
+    });
+  }
 
-// Auto-calculate on input changes
-document.addEventListener('DOMContentLoaded', function() {
-  // Add event listeners to all inputs
-  document.querySelectorAll('input').forEach(input => {
-    input.addEventListener('input', calculate);
-  });
-
-  // Sync percentage inputs
-  document.getElementById('emergency-percent').addEventListener('input', function() {
-    const val = parseInt(this.value) || 0;
-    document.getElementById('investment-percent').value = Math.max(0, 100 - val);
-    calculate(); // Recalculate after syncing
+  // Buttons
+  document.getElementById('run').addEventListener('click', ()=> render(calculate()));
+  document.getElementById('reset').addEventListener('click', ()=>{
+    localStorage.removeItem('futurecalc_inputs');
+    location.reload();
   });
 
-  document.getElementById('investment-percent').addEventListener('input', function() {
-    const val = parseInt(this.value) || 0;
-    document.getElementById('emergency-percent').value = Math.max(0, 100 - val);
-    calculate(); // Recalculate after syncing
-  });
-
-  // Initial calculation
-  calculate();
-});
+  // Auto-run if paycheck + expenses present
+  (function autorun(){
+    if ($('gross').value && $('monthlyExpenses').value) render(calculate());
+  })();
 </script>
 </body>
 </html>
