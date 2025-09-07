@@ -1,0 +1,30 @@
+# .github/workflows/license-check.yml
+
+name: License Compliance Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check-licenses:
+    name: Check for Incompatible Licenses
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # This action from fossa.com checks licenses
+      - name: FOSSA License Scan
+        uses: fossa/fossa-action@v1
+        with:
+          # FOSSA is free for public repos and doesn't require a key
+          # For private repos, you'd add: fossa-api-key: ${{ secrets.FOSSA_API_KEY }}
+          run-scan: true
