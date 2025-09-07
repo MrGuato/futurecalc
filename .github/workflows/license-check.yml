@@ -27,4 +27,4 @@ jobs:
         with:
           # FOSSA is free for public repos and doesn't require a key
           # For private repos, you'd add: fossa-api-key: ${{ secrets.FOSSA_API_KEY }}
-          run-scan: true
+          run-tests: true
