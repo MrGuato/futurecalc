@@ -28,5 +28,4 @@ jobs:
           LINTER_RULES_PATH: linters/
           VALIDATE_HTML: true
           VALIDATE_JAVASCRIPT_ES: true
-          VALIDATE_MARKDOWN: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
