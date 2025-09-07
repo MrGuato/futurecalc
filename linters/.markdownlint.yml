@@ -12,5 +12,5 @@ MD030:
 MD007:
   indent: 3
 
-# Don't fail on trailing spaces (optional)
+# (Optional) Ignore trailing spaces; or remove this to enforce trimming
 MD009: false
