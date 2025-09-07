@@ -8,11 +8,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <style>
   :root{
-    --bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
-    --accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#0b0f14; --card:#101722; --ink:#e7eef8; --muted:#9fb2cc; --accent:#6ea8ff; --accent2:#58d38a; --line:#1b2432; --chip:#0f1622; }
+    --bg:#0b0f14; --card:#101722; --ink:#e7eef8; --muted:#9fb2cc;
+    --accent:#6ea8ff; --accent2:#58d38a; --line:#1b2432; --chip:#0f1622;
+    --blue:#4da3ff; --blueFill:rgba(77,163,255,.15);
+    --green:#49d17d; --greenFill:rgba(73,209,125,.15);
+    --warn:#ff8a8a;
   }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
@@ -22,31 +22,35 @@
   .wrap{max-width:1100px;margin:0 auto;padding:18px}
   .grid{display:grid;gap:16px;grid-template-columns:1fr}
   @media(min-width:960px){.grid{grid-template-columns:380px 1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
   .card h2{margin:0 0 12px;font-size:18px}
   label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
-  input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;color:#0e1621;outline:none}
-  @media(prefers-color-scheme:dark){input,select{background:#0e141d;color:#e7eef8}}
+  .row{display:flex;gap:10px}.row>*{flex:1}
+  input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0e141d;color:var(--ink);outline:none}
   input[type="checkbox"]{width:auto;transform:translateY(2px)}
-  .row{display:flex;gap:10px}
-  .row > *{flex:1}
   .help{font-size:12px;color:var(--muted);margin-top:4px}
-  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#001428;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
   .btn.secondary{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
   .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
   @media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
   .stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
   .stat .k{font-size:12px;color:var(--muted)}
   .stat .v{font-size:18px;margin-top:4px}
+  .right{display:flex;justify-content:space-between;flex-wrap:wrap}
   .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px;color:var(--muted)}
-  .oplist{margin:10px 0 0;padding-left:18px}
-  .oplist li{margin:6px 0}
-  canvas{width:100%;height:340px}
   .divider{height:1px;background:var(--line);margin:14px 0}
   .footer{color:var(--muted);font-size:12px;margin-top:10px}
-  .flex{display:flex;align-items:center;gap:10px}
+  .oplist{margin:10px 0 0;padding-left:18px}.oplist li{margin:6px 0}
   .tag{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-  .right{display:flex;justify-content:space-between;flex-wrap:wrap}
+  .chart-box{position:relative;height:200px} /* compact chart */
+  /* EF progress */
+  .ef-wrap{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
+  .bar{height:10px;background:#0e141d;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .4s ease}
+  .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
+  .mini .box{background:#0e141d;border:1px solid var(--line);border-radius:10px;padding:10px}
+  .mini .box .k{font-size:11px;color:var(--muted)} .mini .box .v{font-size:14px;margin-top:2px}
+  .tooltip{cursor:help;border-bottom:1px dotted var(--muted)}
 </style>
 </head>
 <body>
@@ -57,6 +61,7 @@
 
 <div class="wrap">
   <div class="grid">
+    <!-- Inputs -->
     <section class="card" id="inputs">
       <h2>1) Your Inputs</h2>
 
@@ -83,12 +88,14 @@
         <div>
           <label>Investing — % of each paycheck</label>
           <input id="investPct" type="number" min="0" max="100" step="0.1" value="15" />
-          <div class="help">Long-term investing (e.g., index funds). Default example: 15%.</div>
+          <input id="investSlider" type="range" min="0" max="100" step="1" value="15" />
+          <div class="help">Long-term (e.g., index funds). <span class="tooltip" title="A steady % wins over time.">What % works?</span></div>
         </div>
         <div>
           <label>Savings — % of each paycheck</label>
           <input id="savePct" type="number" min="0" max="100" step="0.1" value="10" />
-          <div class="help">Cash for emergencies in a high-yield savings account.</div>
+          <input id="saveSlider" type="range" min="0" max="100" step="1" value="10" />
+          <div class="help">Cash for emergencies. <span class="tooltip" title="Build 6× monthly essentials before extra investing.">Why cash first?</span></div>
         </div>
       </div>
 
@@ -96,12 +103,12 @@
         <div>
           <label>Expected annual return (investing)</label>
           <input id="annualReturn" type="number" min="0" max="20" step="0.1" value="9" />
-          <div class="help">Historical-style assumption (not guaranteed).</div>
+          <div class="help"><span class="tooltip" title="Annualized geometric average; markets vary.">Assumption</span>, not a guarantee.</div>
         </div>
         <div>
           <label>Savings APY</label>
           <input id="savingsApy" type="number" min="0" max="10" step="0.1" value="0.5" />
-          <div class="help">Cash interest rate for savings.</div>
+          <div class="help"><span class="tooltip" title="High-yield savings or money market.">Typical APY</span>.</div>
         </div>
       </div>
 
@@ -109,50 +116,71 @@
         <div>
           <label>Your average monthly living expenses</label>
           <input id="monthlyExpenses" type="number" min="0" step="1" placeholder="e.g., 2,500" />
-          <div class="help">Rent/mortgage, utilities, groceries, insurance, transportation, and minimum debt payments.</div>
+          <div class="help">Housing, utilities, groceries, transport, insurance, minimum debts.</div>
         </div>
         <div>
           <label>Emergency fund target</label>
-          <div class="flex"><span class="pill">6 × monthly expenses</span></div>
+          <div style="display:flex;gap:8px;align-items:center"><span class="pill">6 × monthly expenses</span></div>
           <div class="help">Recommended cushion for job loss or big surprises.</div>
         </div>
       </div>
 
       <div class="divider"></div>
 
-      <div class="flex">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <input id="redirect" type="checkbox" checked />
-        <label for="redirect">After emergency fund is full, redirect the Savings % to Investing</label>
+        <label for="redirect">After EF is full, redirect the Savings % to Investing</label>
       </div>
 
       <div class="divider"></div>
 
-      <div class="flex" style="gap:8px;flex-wrap:wrap">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="run">Calculate</button>
         <button class="btn secondary" id="reset">Reset</button>
         <span class="tag" id="status">Ready</span>
       </div>
     </section>
 
+    <!-- Results -->
     <section class="card">
       <h2>2) Results & Insights</h2>
 
       <div class="stats">
-        <div class="stat">
-          <div class="k">Investing total (end of horizon)</div>
-          <div class="v" id="investTotal">$0</div>
+        <div class="stat"><div class="k">Investing total (end)</div><div class="v" id="investTotal">$0</div></div>
+        <div class="stat"><div class="k">Savings balance (end)</div><div class="v" id="saveTotal">$0</div></div>
+        <div class="stat"><div class="k">Emergency fund goal</div><div class="v" id="efGoal">$0</div></div>
+        <div class="stat"><div class="k">Time to reach EF</div><div class="v" id="timeToEF">—</div></div>
+      </div>
+
+      <div class="ef-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><strong>Emergency Fund Progress</strong></div>
+          <div class="mini">
+            <div class="box"><div class="k">Current</div><div class="v" id="efNow">$0</div></div>
+            <div class="box"><div class="k">Goal</div><div class="v" id="efGoalMini">$0</div></div>
+          </div>
         </div>
-        <div class="stat">
-          <div class="k">Savings balance (end of horizon)</div>
-          <div class="v" id="saveTotal">$0</div>
+        <div class="bar" aria-label="Emergency Fund progress"><span id="efBar"></span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="mini">
+        <div class="box">
+          <div class="k">Investing: Contributions</div>
+          <div class="v" id="invContrib">$0</div>
         </div>
-        <div class="stat">
-          <div class="k">Emergency fund goal</div>
-          <div class="v" id="efGoal">$0</div>
+        <div class="box">
+          <div class="k">Investing: Growth</div>
+          <div class="v" id="invGrowth">$0</div>
         </div>
-        <div class="stat">
-          <div class="k">Time to reach emergency fund</div>
-          <div class="v" id="timeToEF">—</div>
+        <div class="box">
+          <div class="k">Savings: Contributions</div>
+          <div class="v" id="savContrib">$0</div>
+        </div>
+        <div class="box">
+          <div class="k">Savings: Interest</div>
+          <div class="v" id="savGrowth">$0</div>
         </div>
       </div>
 
@@ -171,8 +199,17 @@
 
       <div class="divider"></div>
 
-      <div style="position:relative;height:360px">
+      <div class="chart-box">
         <canvas id="chart"></canvas>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="mini">
+        <div class="box"><div class="k">Milestone</div><div class="v" id="mileEF">EF: —</div></div>
+        <div class="box"><div class="k">$100k invested</div><div class="v" id="mile100k">—</div></div>
+        <div class="box"><div class="k">$250k invested</div><div class="v" id="mile250k">—</div></div>
+        <div class="box"><div class="k">$500k invested</div><div class="v" id="mile500k">—</div></div>
       </div>
 
       <p class="footer">
@@ -187,7 +224,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 <script>
-  // Utilities
+  // Helpers
   const $ = (id)=>document.getElementById(id);
   const fmt = (n)=> n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
   const monthsWords = (p)=>{
@@ -197,141 +234,168 @@
     if (m===0) return `${y} year${y!==1?'s':''}`;
     return `${y}y ${m}m`;
   };
-
-  // Persist inputs
   const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
-  function saveInputs(){
-    const d={}; fields.forEach(f=>{const el=$(f); d[f]=el.type==='checkbox'?el.checked:el.value;});
-    localStorage.setItem('futurecalc_inputs',JSON.stringify(d));
-  }
-  function loadInputs(){
-    const raw=localStorage.getItem('futurecalc_inputs'); if(!raw) return;
-    try{const d=JSON.parse(raw);
-      fields.forEach(f=>{if(d[f]!==undefined){const el=$(f); if(el.type==='checkbox') el.checked=d[f]; else el.value=d[f];}});
-    }catch(e){}
-  }
+  function saveInputs(){const d={};fields.forEach(f=>{const el=$(f);d[f]=el.type==='checkbox'?el.checked:el.value;});localStorage.setItem('futurecalc_inputs',JSON.stringify(d));}
+  function loadInputs(){const raw=localStorage.getItem('futurecalc_inputs'); if(!raw) return; try{const d=JSON.parse(raw); fields.forEach(f=>{if(d[f]!==undefined){const el=$(f); el.type==='checkbox'?el.checked=d[f]:el.value=d[f];}});}catch(e){}}
   fields.forEach(f=>{const el=$(f); el.addEventListener('input',saveInputs); el.addEventListener('change',saveInputs);});
   loadInputs();
 
-  // Core math
+  // slider <-> input sync
+  function syncPair(numId, sliderId){
+    const num=$(numId), rng=$(sliderId);
+    const sync=(a,b)=>{a.value=b.value; saveInputs();};
+    num.addEventListener('input',()=>{rng.value=num.value;});
+    rng.addEventListener('input',()=>{num.value=rng.value;});
+  }
+  syncPair('investPct','investSlider');
+  syncPair('savePct','saveSlider');
+
   function calculate(){
-    const gross=parseFloat($('gross').value||0);
-    const periodsPerYear=parseInt($('frequency').value||26,10);
-    const years=parseInt($('years').value||30,10);
-    const investPct=Math.max(0,Math.min(100,parseFloat($('investPct').value||0)))/100;
-    const savePct=Math.max(0,Math.min(100,parseFloat($('savePct').value||0)))/100;
-    const annualReturn=Math.max(0,parseFloat($('annualReturn').value||0))/100;
-    const savingsApy=Math.max(0,parseFloat($('savingsApy').value||0))/100;
-    const monthlyExpenses=parseFloat($('monthlyExpenses').value||0);
+    const gross=+($('gross').value||0);
+    const periodsPerYear=+($('frequency').value||26);
+    const years=+($('years').value||30);
+    const investPct=Math.min(100,Math.max(0,+($('investPct').value||0)))/100;
+    const savePct=Math.min(100,Math.max(0,+($('savePct').value||0)))/100;
+    const annualReturn=Math.max(0,+($('annualReturn').value||0))/100;
+    const savingsApy=Math.max(0,+($('savingsApy').value||0))/100;
+    const monthlyExpenses=+($('monthlyExpenses').value||0);
     const redirect=$('redirect').checked;
 
     $('status').textContent='Calculating…';
-    if (gross<=0 || (investPct+savePct)<=0 || years<=0 || periodsPerYear<=0){
-      $('status').textContent='Enter paycheck, %s, and years';
-      return null;
-    }
+    if (!gross || !(investPct+savePct) || !years || !periodsPerYear){ $('status').textContent='Enter paycheck, %s, and years'; return null; }
 
     const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
-    const totalPeriods = years * periodsPerYear;
+    const totalP = years*periodsPerYear;
+    const rI = Math.pow(1+annualReturn,1/periodsPerYear)-1;
+    const rS = Math.pow(1+savingsApy,1/periodsPerYear)-1;
 
-    const rInvest = Math.pow(1+annualReturn, 1/periodsPerYear)-1;
-    const rSave   = Math.pow(1+savingsApy,   1/periodsPerYear)-1;
+    let inv=0, sav=0, efAt=Infinity;
+    let invContrib=0, invGrowth=0;
+    let savContrib=0, savGrowth=0;
 
-    let investBal=0, saveBal=0, efReachedAt=Infinity;
-    const investSeries=[], saveSeries=[], labels=[];
+    const invP=[], savP=[];
+    const investMilestones = { '100000': Infinity, '250000': Infinity, '500000': Infinity };
 
-    for (let p=0; p<=totalPeriods; p++){
-      investSeries.push(investBal);
-      saveSeries.push(saveBal);
-      if (p%periodsPerYear===0) labels.push(`Year ${p/periodsPerYear}`);
-      if (p===totalPeriods) break;
+    for(let p=0;p<=totalP;p++){
+      invP.push(inv); savP.push(sav);
+      if(p===totalP) break;
 
-      let investContrib = investPct * gross;
-      let saveContrib   = savePct * gross;
+      let cI=investPct*gross, cS=savePct*gross;
 
-      // Stop savings at goal; optionally redirect to investing
-      if (efGoal>0 && saveBal >= efGoal - 0.005){
-        if (efReachedAt===Infinity) efReachedAt = p;
-        saveContrib = 0;
-        if (redirect) investContrib += savePct * gross;
+      // EF stop/redirect
+      if(efGoal>0 && sav>=efGoal-0.005){
+        if(efAt===Infinity) efAt=p;
+        cS=0; if(redirect) cI+=savePct*gross;
       }
 
-      // Grow then add
-      investBal = investBal * (1 + rInvest) + investContrib;
-      saveBal   = Math.min(efGoal>0?efGoal:Infinity, saveBal * (1 + rSave) + saveContrib);
+      // Growth portions this period (before contributions)
+      const gI = inv * rI;
+      const gS = sav * rS;
+
+      // Update balances
+      inv = inv + gI + cI;
+      sav = (efGoal>0) ? Math.min(efGoal, sav + gS + cS) : sav + gS + cS;
+
+      // Sums
+      invContrib += cI;
+      invGrowth  += gI;
+      // Savings: interest only accrues until goal; any excess is clipped by Math.min above
+      // To avoid counting clipped interest, recompute actual interest realized:
+      const realizedS = (efGoal>0) ? Math.max(0, Math.min(efGoal, sav) - Math.min(efGoal, sav - gS - cS) - cS) : gS;
+      savContrib += cS;
+      savGrowth  += realizedS;
+
+      // record milestones when crossed
+      const balancesAfter = inv;
+      for (const k of Object.keys(investMilestones)){
+        if (investMilestones[k]===Infinity && balancesAfter >= +k) investMilestones[k]=p;
+      }
     }
 
-    $('status').textContent='Done';
-    return {investBal, saveBal, efGoal, efReachedAt, labels, investSeries, saveSeries, periodsPerYear, years};
+    return {
+      inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years,
+      invContrib, invGrowth, savContrib, savGrowth, investMilestones
+    };
   }
 
-  // Render
+  // labels Year 0..N
+  const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
+
   let chart;
   function render(res){
     if(!res) return;
-    $('investTotal').textContent = fmt(res.investBal);
-    $('saveTotal').textContent   = fmt(res.saveBal);
-    $('efGoal').textContent      = res.efGoal>0 ? fmt(res.efGoal) : 'Not set';
-    $('timeToEF').textContent    = (res.efGoal>0)
-      ? (res.efReachedAt===Infinity ? 'Not reached' : monthsWords(Math.round(res.efReachedAt * 12 / res.periodsPerYear)))
-      : '—';
+    $('status').textContent='Done';
 
-    $('efExplain').textContent   = '6 months of your essential monthly expenses';
-    $('investExplain').textContent = `${$('investPct').value}%`;
-    $('retExplain').textContent  = `${$('annualReturn').value}%`;
-    $('redirExplain').textContent= $('redirect').checked
-      ? 'this adds your Savings % to Investing automatically'
-      : 'you keep your Savings % in cash even after the fund is full';
+    // Totals
+    $('investTotal').textContent=fmt(res.inv);
+    $('saveTotal').textContent=fmt(res.sav);
+    $('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
+    $('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
 
-    // Downsample to yearly points for clarity
-    const yearlyInvest=[], yearlySave=[];
-    for (let y=0; y<=res.years; y++){
-      const i = y * res.periodsPerYear;
-      yearlyInvest.push(res.investSeries[i]);
-      yearlySave.push(res.saveSeries[i]);
-    }
+    // EF progress
+    $('efNow').textContent=fmt(res.sav);
+    $('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
+    const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
+    $('efBar').style.width = pct + '%';
 
-    const data = {
-      labels: res.labels,
-      datasets: [
-        {label: 'Investing balance', data: yearlyInvest},
-        {label: 'Savings balance',   data: yearlySave},
-      ]
-    };
+    // Contributions vs growth
+    $('invContrib').textContent = fmt(res.invContrib);
+    $('invGrowth').textContent  = fmt(Math.max(0, res.inv - res.invContrib));
+    $('savContrib').textContent = fmt(res.savContrib);
+    $('savGrowth').textContent  = fmt(res.savGrowth);
 
-    if (chart) chart.destroy();
-    const ctx = document.getElementById('chart').getContext('2d');
-    chart = new Chart(ctx, {
-      type: 'line',
-      data,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted') || '#4a5a70' } },
-          tooltip: { callbacks: { label: (c)=> `${c.dataset.label}: ${fmt(c.parsed.y||0)}` } }
+    // copy text updates
+    $('efExplain').textContent='6 months of your essential monthly expenses';
+    $('investExplain').textContent=`${$('investPct').value}%`;
+    $('retExplain').textContent=`${$('annualReturn').value}%`;
+    $('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
+
+    // yearly downsample
+    const invY=[], savY=[];
+    for(let y=0;y<=res.years;y++){ const i=y*res.periodsPerYear; invY.push(res.invP[i]); savY.push(res.savP[i]); }
+
+    // Chart
+    if(chart) chart.destroy();
+    const ctx=$('chart').getContext('2d');
+    chart=new Chart(ctx,{
+      type:'line',
+      data:{
+        labels:yearLabels(res.years),
+        datasets:[
+          {label:'Investing balance', data:invY, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2},
+          {label:'Savings balance',   data:savY, borderColor:getVar('--green'), backgroundColor:getVar('--greenFill'), fill:true, tension:.2}
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{labels:{color:getVar('--muted')}},
+          tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}
         },
-        scales: {
-          x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted') }, grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--line') } },
-          y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted'), callback: (v)=>'$'+Intl.NumberFormat().format(v) }, grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--line') } }
+        scales:{
+          x:{ticks:{color:getVar('--muted')}, grid:{color:'rgba(255,255,255,0.05)'}},
+          y:{ticks:{color:getVar('--muted'), callback:(v)=>'$'+Intl.NumberFormat().format(v)}, grid:{color:'rgba(255,255,255,0.07)'}}
         },
-        elements: { point: { radius: 0 } }
+        elements:{point:{radius:0}}
       }
     });
+
+    // Milestones
+    $('mileEF').textContent = (res.efGoal>0) ? (res.efAt===Infinity?'—':`Reached in ${monthsWords(Math.round(res.efAt*12/res.periodsPerYear))}`) : '—';
+    $('mile100k').textContent = milestoneText(res.investMilestones['100000'], res.periodsPerYear);
+    $('mile250k').textContent = milestoneText(res.investMilestones['250000'], res.periodsPerYear);
+    $('mile500k').textContent = milestoneText(res.investMilestones['500000'], res.periodsPerYear);
   }
 
-  // Buttons
-  document.getElementById('run').addEventListener('click', ()=> render(calculate()));
-  document.getElementById('reset').addEventListener('click', ()=>{
-    localStorage.removeItem('futurecalc_inputs');
-    location.reload();
-  });
+  const getVar=(name)=>getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#9fb2cc';
+  const milestoneText=(p,ppy)=> p===Infinity?'—':monthsWords(Math.round(p*12/ppy));
 
-  // Auto-run if paycheck + expenses present
-  (function autorun(){
-    if ($('gross').value && $('monthlyExpenses').value) render(calculate());
-  })();
+  // Buttons
+  $('run').addEventListener('click',()=>render(calculate()));
+  $('reset').addEventListener('click',()=>{localStorage.removeItem('futurecalc_inputs'); location.reload();});
+
+  // Optional autorun
+  (function autorun(){ if($('gross').value && $('monthlyExpenses').value){ render(calculate()); } })();
 </script>
 </body>
 </html>
