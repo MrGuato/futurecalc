@@ -1,0 +1,48 @@
+name: "CodeQL Analysis"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '21 6 * * 5' # Run at 06:21 UTC on Fridays
+
+jobs:
+  analyze:
+    name: Analyze (JavaScript)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # 1. THE MAIN FIX: Specify the language to scan.
+        # Your project is pure JavaScript.
+        language: ['javascript-typescript']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # 2. RECOMMENDED: Use a more comprehensive query suite.
+          # 'security-and-quality' includes security queries plus correctness and maintainability checks.
+          queries: security-extended,security-and-quality
+
+      # 3. NO BUILD STEP NEEDED:
+      # The 'autobuild' or 'manual build' step is NOT required for JavaScript,
+      # as it is an interpreted language. CodeQL analyzes the source files directly.
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          # 4. TYPO FIX: Ensure 'matrix.language' is lowercase.
+          category: "/language:${{matrix.language}}"
