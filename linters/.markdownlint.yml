@@ -3,6 +3,9 @@ MD013: false   # line length
 MD033: false   # inline HTML allowed
 MD041: false   # first line heading not required
 
+#allow empty links:
+MD042: false
+
 # Allow 3 spaces after list markers
 MD030:
   ul_single: 3
