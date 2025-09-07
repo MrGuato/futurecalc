@@ -8,6 +8,7 @@ MD042: false
 
 #empty spaces 0-2
 MD009: false
+MD030: false
 
 # Allow 3 spaces after list markers
 MD030:
