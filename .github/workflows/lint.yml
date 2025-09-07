@@ -1,5 +1,3 @@
-# .github/workflows/lint.yml
-
 name: Lint Code Base
 
 on:
@@ -8,25 +6,26 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+  packages: read
+  statuses: write
+
 jobs:
   run-lint:
     name: Run Linter
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          # Full git history is needed for some checks
           fetch-depth: 0
 
-      - name: Lint Code Base
-        uses: github/super-linter@v5
-        env:
-          # --- THIS IS THE CRUCIAL NEW PART ---
-          # Force the linter to look for config files in this specific directory
-          LINTER_RULES_PATH: .github/linters/
 
-          # --- Continue to specify which linters to run ---
+      - name: Super-Linter
+        uses: super-linter/super-linter@v8.1.0
+        env:
+          LINTER_RULES_PATH: linters/
           VALIDATE_HTML: true
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_MARKDOWN: true
