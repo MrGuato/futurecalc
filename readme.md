@@ -29,14 +29,14 @@ Millennials and Gen-X professionals often feel behind compared to boomers’ wea
 
 FutureCalc is also built as a showcase of secure engineering practices:
 
-*   **No Backend / No Data Collected:** Runs 100% in your browser. Your financial data is never sent anywhere.
-*   **LocalStorage Only:** Your inputs are saved in your browser's local storage for convenience, not on a server.
-*   **MIT Licensed & Open-Source:** The code is completely transparent for review.
-*   **Secure Coding Standards:** No unsafe `eval()`, strict scoping, and sanitized inputs.
-*   **Repo Security:**
-    *   `SECURITY.md` for vulnerability reporting guidelines.
-    *   GitHub Actions for CI/CD and linting.
-    *   Automation: Dependabot + CodeQL scanning.
+* **No Backend / No Data Collected:** Runs 100% in your browser. Your financial data is never sent anywhere.
+* **LocalStorage Only:** Your inputs are saved in your browser's local storage for convenience, not on a server.
+* **MIT Licensed & Open-Source:** The code is completely transparent for review.
+* **Secure Coding Standards:** No unsafe `eval()`, strict scoping, and sanitized inputs.
+* **Repo Security:**
+   *   `SECURITY.md` for vulnerability reporting guidelines.
+   *   GitHub Actions for CI/CD and linting.
+   *   Automation: Dependabot + CodeQL scanning.
 
 *This demonstrates a DevSecOps mindset: security and hygiene are important, even for a simple educational tool.*
 
@@ -55,5 +55,5 @@ MIT License © 2025 Jonathan DeLeon
 
 Please see the [SECURITY.md](SECURITY.md) file for details on how to report security vulnerabilities.
 
-*   You can report issues via GitHub Issues or contact me directly.
-*   This is an educational project and is not intended to handle sensitive personal data.
+* You can report issues via GitHub Issues or contact me directly.
+* This is an educational project and is not intended to handle sensitive personal data.
