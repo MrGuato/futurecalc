@@ -22,8 +22,8 @@ jobs:
           node-version: '20'
 
       # This action from fossa.com checks licenses
-      - name: FOSSA License Scan
-        uses: fossa/fossa-action@v1
+      - name: Run FOSSA scan
+        uses: fossas/fossa-action@v1.3.3
         with:
           # FOSSA is free for public repos and doesn't require a key
           # For private repos, you'd add: fossa-api-key: ${{ secrets.FOSSA_API_KEY }}
