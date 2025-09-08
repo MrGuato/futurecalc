@@ -243,7 +243,6 @@
   // slider <-> input sync
   function syncPair(numId, sliderId){
     const num=$(numId), rng=$(sliderId);
-    const sync=(a,b)=>{a.value=b.value; saveInputs();};
     num.addEventListener('input',()=>{rng.value=num.value;});
     rng.addEventListener('input',()=>{num.value=rng.value;});
   }
