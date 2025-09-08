@@ -246,6 +246,7 @@
 <script>
   // ============== Helpers ==============
   const $ = (id)=>document.getElementById(id);
+  const setStatus = (msg)=>{ const s=$('status'); if(s) s.textContent=msg; };
   const fmt = (n)=> n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
   const monthsWords = (p)=>{
     const y=Math.floor(p/12), m=p%12;
@@ -258,6 +259,7 @@
 
   // ⭐ Define chart early so theme code can safely reference it
   let chart = null;
+  let DOM_READY = false;
 
   // ============== Theme handling (icon button cycles Auto → Light → Dark) ==============
   const THEME_KEY = 'futurecalc_theme';
@@ -268,15 +270,14 @@
   function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
   function applyTheme(mode){
     const root = document.documentElement;
-    if (mode === 'auto') {
-      root.setAttribute('data-theme', systemPrefersDark() ? 'dark' : 'light');
-    } else {
-      root.setAttribute('data-theme', mode);
-    }
+    root.setAttribute('data-theme', mode === 'auto' ? (systemPrefersDark() ? 'dark' : 'light') : mode);
     localStorage.setItem(THEME_KEY, mode);
     const btn = $('themeBtn');
     if (btn){ btn.textContent = themeIcons[mode]; btn.setAttribute('aria-label', themeLabels[mode]); btn.title = themeLabels[mode]; }
-    if (chart) render(calculate());
+    // Only try to re-render if DOM is ready and canvas exists
+    if (DOM_READY && $('chart')) {
+      try { if (chart) chart.destroy(); render(calculate()); } catch(e){ console.error(e); }
+    }
   }
   function initTheme(){
     const saved = localStorage.getItem(THEME_KEY) || 'auto';
@@ -296,40 +297,64 @@
   }
 
   document.addEventListener('DOMContentLoaded', ()=>{
-    $('themeBtn').addEventListener('click', cycleTheme);
+    DOM_READY = true;
+
+    // Fail fast if Chart.js didn't load
+    if (!window.Chart){
+      setStatus('Chart library failed to load.');
+      console.error('Chart.js UMD not available (window.Chart is undefined). Check network / CSP / adblock.');
+    }
+
+    const btn = $('themeBtn');
+    if (btn) btn.addEventListener('click', cycleTheme);
     initTheme();
+
+    // Persist inputs
+    const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
+    function saveInputs(){const d={};fields.forEach(f=>{const el=$(f);d[f]=el.type==='checkbox'?el.checked:el.value;});localStorage.setItem('futurecalc_inputs',JSON.stringify(d));}
+    function loadInputs(){const raw=localStorage.getItem('futurecalc_inputs'); if(!raw) return; try{const d=JSON.parse(raw); fields.forEach(f=>{if(d[f]!==undefined){const el=$(f); el.type==='checkbox'?el.checked=d[f]:el.value=d[f];}});}catch(e){}}
+    fields.forEach(f=>{const el=$(f); if(el){ el.addEventListener('input',saveInputs); el.addEventListener('change',saveInputs); }});
+    loadInputs();
+
+    // slider <-> input sync
+    function syncPair(numId, sliderId){
+      const num=$(numId), rng=$(sliderId);
+      if (!num || !rng) return;
+      num.addEventListener('input',()=>{rng.value=num.value;});
+      rng.addEventListener('input',()=>{num.value=rng.value;});
+    }
+    syncPair('investPct','investSlider');
+    syncPair('savePct','saveSlider');
+
+    // Buttons
+    const runBtn=$('run'), resetBtn=$('reset');
+    if (runBtn) runBtn.addEventListener('click',()=>render(calculate()));
+    if (resetBtn) resetBtn.addEventListener('click',()=>{localStorage.removeItem('futurecalc_inputs'); location.reload();});
+
+    // Optional autorun
+    if($('gross')?.value && $('monthlyExpenses')?.value){ render(calculate()); }
   });
-
-  // ============== Persist inputs ==============
-  const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
-  function saveInputs(){const d={};fields.forEach(f=>{const el=$(f);d[f]=el.type==='checkbox'?el.checked:el.value;});localStorage.setItem('futurecalc_inputs',JSON.stringify(d));}
-  function loadInputs(){const raw=localStorage.getItem('futurecalc_inputs'); if(!raw) return; try{const d=JSON.parse(raw); fields.forEach(f=>{if(d[f]!==undefined){const el=$(f); el.type==='checkbox'?el.checked=d[f]:el.value=d[f];}});}catch(e){}}
-  fields.forEach(f=>{const el=$(f); el.addEventListener('input',saveInputs); el.addEventListener('change',saveInputs);});
-  loadInputs();
-
-  // slider <-> input sync
-  function syncPair(numId, sliderId){
-    const num=$(numId), rng=$(sliderId);
-    num.addEventListener('input',()=>{rng.value=num.value;});
-    rng.addEventListener('input',()=>{num.value=rng.value;});
-  }
-  syncPair('investPct','investSlider');
-  syncPair('savePct','saveSlider');
 
   // ============== Core math ==============
   function calculate(){
-    const gross=+($('gross').value||0);
-    const periodsPerYear=+($('frequency').value||26);
-    const years=+($('years').value||30);
-    const investPct=Math.min(100,Math.max(0,+($('investPct').value||0)))/100;
-    const savePct=Math.min(100,Math.max(0,+($('savePct').value||0)))/100;
-    const annualReturn=Math.max(0,+($('annualReturn').value||0))/100;
-    const savingsApy=Math.max(0,+($('savingsApy').value||0))/100;
-    const monthlyExpenses=+($('monthlyExpenses').value||0);
-    const redirect=$('redirect').checked;
+    // If Chart.js is missing, bail gracefully
+    if (!window.Chart){ return null; }
 
-    $('status').textContent='Calculating…';
-    if (!gross || !(investPct+savePct) || !years || !periodsPerYear){ $('status').textContent='Enter paycheck, %s, and years'; return null; }
+    const gross=+($('gross')?.value||0);
+    const periodsPerYear=+($('frequency')?.value||26);
+    const years=+($('years')?.value||30);
+    const investPct=Math.min(100,Math.max(0,+($('investPct')?.value||0)))/100;
+    const savePct=Math.min(100,Math.max(0,+($('savePct')?.value||0)))/100;
+    const annualReturn=Math.max(0,+($('annualReturn')?.value||0))/100;
+    const savingsApy=Math.max(0,+($('savingsApy')?.value||0))/100;
+    const monthlyExpenses=+($('monthlyExpenses')?.value||0);
+    const redirect=$('redirect')?.checked ?? true;
+
+    setStatus('Calculating…');
+    if (!gross || !(investPct+savePct) || !years || !periodsPerYear){
+      setStatus('Enter paycheck, %s, and years');
+      return null;
+    }
 
     const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
     const totalP = years*periodsPerYear;
@@ -391,8 +416,8 @@
   const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
 
   function render(res){
-    if(!res) return;
-    $('status').textContent='Done';
+    if(!res){ return; }
+    setStatus('Rendering…');
 
     // Totals
     $('investTotal').textContent=fmt(res.inv);
@@ -422,9 +447,21 @@
     const invY=[], savY=[];
     for(let y=0;y<=res.years;y++){ const i=y*res.periodsPerYear; invY.push(res.invP[i]); savY.push(res.savP[i]); }
 
-    // Chart
+    // Chart (safe)
+    const canvas = $('chart');
+    if (!canvas){
+      setStatus('Canvas not found.');
+      console.error('Canvas #chart missing in DOM.');
+      return;
+    }
+    const ctx = canvas.getContext('2d');
+    if (!ctx){
+      setStatus('Unable to init chart context.');
+      console.error('getContext("2d") returned null. Check browser or canvas visibility.');
+      return;
+    }
+
     if(chart) chart.destroy();
-    const ctx=$('chart').getContext('2d');
     chart=new Chart(ctx,{
       type:'line',
       data:{
@@ -448,20 +485,8 @@
       }
     });
 
-    // Milestones
-    const milestoneText=(p,ppy)=> p===Infinity?'—':monthsWords(Math.round(p*12/ppy));
-    $('mileEF').textContent = (res.efGoal>0) ? (res.efAt===Infinity?'—':`Reached in ${monthsWords(Math.round(res.efAt*12/res.periodsPerYear))}`) : '—';
-    $('mile100k').textContent = milestoneText(res.investMilestones['100000'], res.periodsPerYear);
-    $('mile250k').textContent = milestoneText(res.investMilestones['250000'], res.periodsPerYear);
-    $('mile500k').textContent = milestoneText(res.investMilestones['500000'], res.periodsPerYear);
+    setStatus('Done');
   }
-
-  // Buttons
-  $('run').addEventListener('click',()=>render(calculate()));
-  $('reset').addEventListener('click',()=>{localStorage.removeItem('futurecalc_inputs'); location.reload();});
-
-  // Optional autorun
-  (function autorun(){ if($('gross').value && $('monthlyExpenses').value){ render(calculate()); } })();
 </script>
 </body>
 </html>
