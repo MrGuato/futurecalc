@@ -233,10 +233,10 @@
       </div>
 
       <p class="footer">
-        <strong>What is “6 months of living expenses”?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal.
+        <strong>What is "6 months of living expenses"?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal.
       </p>
       <p class="footer">
-        Educational tool only. Returns aren’t guaranteed; personal situations vary.
+        Educational tool only. Returns aren't guaranteed; personal situations vary.
       </p>
     </section>
   </div>
@@ -255,9 +255,19 @@
     if (m===0) return `${y} year${y!==1?'s':''}`;
     return `${y}y ${m}m`;
   };
-  const getVar=(name)=>getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#9fb2cc';
+  
+  // Fixed getVar function with better error handling
+  const getVar=(name)=> {
+    try {
+      const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return value || (name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc');
+    } catch(e) {
+      console.warn('Error getting CSS variable:', name, e);
+      return name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc';
+    }
+  };
 
-  // ⭐ Define chart early so theme code can safely reference it
+  // Chart variable - initialize as null
   let chart = null;
   let DOM_READY = false;
 
@@ -268,17 +278,31 @@
   const themeLabels = { auto:'Theme: Auto', light:'Theme: Light', dark:'Theme: Dark' };
 
   function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+  
   function applyTheme(mode){
     const root = document.documentElement;
     root.setAttribute('data-theme', mode === 'auto' ? (systemPrefersDark() ? 'dark' : 'light') : mode);
     localStorage.setItem(THEME_KEY, mode);
     const btn = $('themeBtn');
-    if (btn){ btn.textContent = themeIcons[mode]; btn.setAttribute('aria-label', themeLabels[mode]); btn.title = themeLabels[mode]; }
-    // Only try to re-render if DOM is ready and canvas exists
-    if (DOM_READY && $('chart')) {
-      try { if (chart) chart.destroy(); render(calculate()); } catch(e){ console.error(e); }
+    if (btn){ 
+      btn.textContent = themeIcons[mode]; 
+      btn.setAttribute('aria-label', themeLabels[mode]); 
+      btn.title = themeLabels[mode]; 
+    }
+    
+    // Only re-render chart if DOM is ready, canvas exists, and we have a chart
+    if (DOM_READY && $('chart') && chart) {
+      try { 
+        const results = calculate();
+        if (results) {
+          render(results); 
+        }
+      } catch(e){ 
+        console.error('Theme change chart re-render failed:', e); 
+      }
     }
   }
+  
   function initTheme(){
     const saved = localStorage.getItem(THEME_KEY) || 'auto';
     applyTheme(saved);
@@ -289,6 +313,7 @@
       });
     }
   }
+  
   function cycleTheme(){
     const current = localStorage.getItem(THEME_KEY) || 'auto';
     const idx = themeModes.indexOf(current);
@@ -296,49 +321,13 @@
     applyTheme(next);
   }
 
-  document.addEventListener('DOMContentLoaded', ()=>{
-    DOM_READY = true;
-
-    // Fail fast if Chart.js didn't load
-    if (!window.Chart){
-      setStatus('Chart library failed to load.');
-      console.error('Chart.js UMD not available (window.Chart is undefined). Check network / CSP / adblock.');
-    }
-
-    const btn = $('themeBtn');
-    if (btn) btn.addEventListener('click', cycleTheme);
-    initTheme();
-
-    // Persist inputs
-    const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
-    function saveInputs(){const d={};fields.forEach(f=>{const el=$(f);d[f]=el.type==='checkbox'?el.checked:el.value;});localStorage.setItem('futurecalc_inputs',JSON.stringify(d));}
-    function loadInputs(){const raw=localStorage.getItem('futurecalc_inputs'); if(!raw) return; try{const d=JSON.parse(raw); fields.forEach(f=>{if(d[f]!==undefined){const el=$(f); el.type==='checkbox'?el.checked=d[f]:el.value=d[f];}});}catch(e){}}
-    fields.forEach(f=>{const el=$(f); if(el){ el.addEventListener('input',saveInputs); el.addEventListener('change',saveInputs); }});
-    loadInputs();
-
-    // slider <-> input sync
-    function syncPair(numId, sliderId){
-      const num=$(numId), rng=$(sliderId);
-      if (!num || !rng) return;
-      num.addEventListener('input',()=>{rng.value=num.value;});
-      rng.addEventListener('input',()=>{num.value=rng.value;});
-    }
-    syncPair('investPct','investSlider');
-    syncPair('savePct','saveSlider');
-
-    // Buttons
-    const runBtn=$('run'), resetBtn=$('reset');
-    if (runBtn) runBtn.addEventListener('click',()=>render(calculate()));
-    if (resetBtn) resetBtn.addEventListener('click',()=>{localStorage.removeItem('futurecalc_inputs'); location.reload();});
-
-    // Optional autorun
-    if($('gross')?.value && $('monthlyExpenses')?.value){ render(calculate()); }
-  });
-
   // ============== Core math ==============
   function calculate(){
-    // If Chart.js is missing, bail gracefully
-    if (!window.Chart){ return null; }
+    // Check if Chart.js loaded
+    if (!window.Chart){ 
+      setStatus('Chart library not loaded');
+      return null; 
+    }
 
     const gross=+($('gross')?.value||0);
     const periodsPerYear=+($('frequency')?.value||26);
@@ -351,8 +340,20 @@
     const redirect=$('redirect')?.checked ?? true;
 
     setStatus('Calculating…');
-    if (!gross || !(investPct+savePct) || !years || !periodsPerYear){
-      setStatus('Enter paycheck, %s, and years');
+    
+    // Better validation
+    if (!gross || gross <= 0) {
+      setStatus('Enter a valid paycheck amount');
+      return null;
+    }
+    
+    if (!(investPct+savePct) || (investPct+savePct) <= 0) {
+      setStatus('Enter investment or savings percentages');
+      return null;
+    }
+    
+    if (!years || years <= 0) {
+      setStatus('Enter valid projection years');
       return null;
     }
 
@@ -392,7 +393,7 @@
       invContrib += cI;
       invGrowth  += gI;
 
-      // realized savings interest (don’t overcount if at cap)
+      // realized savings interest (don't overcount if at cap)
       const realizedS = (efGoal>0)
         ? Math.max(0, Math.min(efGoal, sav) - Math.min(efGoal, sav - gS - cS) - cS)
         : gS;
@@ -416,77 +417,262 @@
   const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
 
   function render(res){
-    if(!res){ return; }
+    if(!res){ 
+      setStatus('No results to render');
+      return; 
+    }
+    
     setStatus('Rendering…');
 
-    // Totals
-    $('investTotal').textContent=fmt(res.inv);
-    $('saveTotal').textContent=fmt(res.sav);
-    $('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
-    $('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
+    try {
+      // Totals
+      $('investTotal').textContent=fmt(res.inv);
+      $('saveTotal').textContent=fmt(res.sav);
+      $('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
+      $('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
 
-    // EF progress
-    $('efNow').textContent=fmt(res.sav);
-    $('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
-    const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
-    $('efBar').style.width = pct + '%';
+      // EF progress
+      $('efNow').textContent=fmt(res.sav);
+      $('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
+      const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
+      $('efBar').style.width = pct + '%';
 
-    // Contributions vs growth
-    $('invContrib').textContent = fmt(res.invContrib);
-    $('invGrowth').textContent  = fmt(Math.max(0, res.inv - res.invContrib));
-    $('savContrib').textContent = fmt(res.savContrib);
-    $('savGrowth').textContent  = fmt(res.savGrowth);
+      // Contributions vs growth
+      $('invContrib').textContent = fmt(res.invContrib);
+      $('invGrowth').textContent  = fmt(Math.max(0, res.inv - res.invContrib));
+      $('savContrib').textContent = fmt(res.savContrib);
+      $('savGrowth').textContent  = fmt(res.savGrowth);
 
-    // copy text updates
-    $('efExplain').textContent='6 months of your essential monthly expenses';
-    $('investExplain').textContent=`${$('investPct').value}%`;
-    $('retExplain').textContent=`${$('annualReturn').value}%`;
-    $('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
+      // copy text updates
+      $('efExplain').textContent='6 months of your essential monthly expenses';
+      $('investExplain').textContent=`${$('investPct').value}%`;
+      $('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
 
-    // yearly downsample
-    const invY=[], savY=[];
-    for(let y=0;y<=res.years;y++){ const i=y*res.periodsPerYear; invY.push(res.invP[i]); savY.push(res.savP[i]); }
+      // Update milestones
+      const periodsToTime = (p) => p === Infinity ? '—' : monthsWords(Math.round(p*12/res.periodsPerYear));
+      $('mileEF').textContent = res.efAt === Infinity ? 'EF: Not reached' : `EF: ${periodsToTime(res.efAt)}`;
+      $('mile100k').textContent = periodsToTime(res.investMilestones['100000']);
+      $('mile250k').textContent = periodsToTime(res.investMilestones['250000']);
+      $('mile500k').textContent = periodsToTime(res.investMilestones['500000']);
 
-    // Chart (safe)
-    const canvas = $('chart');
-    if (!canvas){
-      setStatus('Canvas not found.');
-      console.error('Canvas #chart missing in DOM.');
+      // yearly downsample
+      const invY=[], savY=[];
+      for(let y=0;y<=res.years;y++){ 
+        const i=y*res.periodsPerYear; 
+        invY.push(res.invP[i] || 0); 
+        savY.push(res.savP[i] || 0); 
+      }
+
+      // Chart rendering with better error handling
+      const canvas = $('chart');
+      if (!canvas){
+        setStatus('Canvas not found');
+        console.error('Canvas #chart missing in DOM.');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx){
+        setStatus('Canvas context failed');
+        console.error('getContext("2d") returned null');
+        return;
+      }
+
+      // Destroy existing chart
+      if(chart) {
+        try {
+          chart.destroy();
+        } catch(e) {
+          console.warn('Chart destroy failed:', e);
+        }
+        chart = null;
+      }
+
+      // Create new chart with error handling
+      try {
+        chart = new Chart(ctx, {
+          type:'line',
+          data:{
+            labels:yearLabels(res.years),
+            datasets:[
+              {
+                label:'Investing balance', 
+                data:invY, 
+                borderColor:getVar('--blue'), 
+                backgroundColor:getVar('--blueFill'), 
+                fill:true, 
+                tension:.2
+              },
+              {
+                label:'Savings balance',   
+                data:savY, 
+                borderColor:getVar('--green'), 
+                backgroundColor:getVar('--greenFill'), 
+                fill:true, 
+                tension:.2
+              }
+            ]
+          },
+          options:{
+            responsive:true, 
+            maintainAspectRatio:false, 
+            interaction:{mode:'index',intersect:false},
+            plugins:{
+              legend:{labels:{color:getVar('--muted')}},
+              tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}
+            },
+            scales:{
+              x:{
+                ticks:{color:getVar('--muted')}, 
+                grid:{color:getVar('--gridSoft')}
+              },
+              y:{
+                ticks:{
+                  color:getVar('--muted'), 
+                  callback:(v)=>'$'+Intl.NumberFormat().format(v)
+                }, 
+                grid:{color:getVar('--gridSoft')}
+              }
+            },
+            elements:{point:{radius:0}}
+          }
+        });
+        setStatus('Done');
+      } catch(e) {
+        console.error('Chart creation failed:', e);
+        setStatus('Chart creation failed');
+        return;
+      }
+      
+    } catch(e) {
+      console.error('Render failed:', e);
+      setStatus('Render failed');
+    }
+  }
+
+  // ============== DOM Ready ==============
+  document.addEventListener('DOMContentLoaded', ()=>{
+    DOM_READY = true;
+
+    // Check Chart.js availability
+    if (!window.Chart){
+      setStatus('Chart.js failed to load');
+      console.error('Chart.js not available. Check network connection or ad blockers.');
       return;
     }
-    const ctx = canvas.getContext('2d');
-    if (!ctx){
-      setStatus('Unable to init chart context.');
-      console.error('getContext("2d") returned null. Check browser or canvas visibility.');
-      return;
+
+    // Theme setup
+    const btn = $('themeBtn');
+    if (btn) btn.addEventListener('click', cycleTheme);
+    initTheme();
+
+    // Input persistence
+    const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
+    
+    function saveInputs(){
+      try {
+        const d={};
+        fields.forEach(f=>{
+          const el=$(f);
+          if (el) {
+            d[f]=el.type==='checkbox'?el.checked:el.value;
+          }
+        });
+        localStorage.setItem('futurecalc_inputs',JSON.stringify(d));
+      } catch(e) {
+        console.warn('Failed to save inputs:', e);
+      }
+    }
+    
+    function loadInputs(){
+      try {
+        const raw=localStorage.getItem('futurecalc_inputs'); 
+        if(!raw) return; 
+        const d=JSON.parse(raw); 
+        fields.forEach(f=>{
+          if(d[f]!==undefined){
+            const el=$(f); 
+            if (el) {
+              if (el.type==='checkbox') {
+                el.checked=d[f];
+              } else {
+                el.value=d[f];
+              }
+            }
+          }
+        });
+      } catch(e) {
+        console.warn('Failed to load inputs:', e);
+      }
     }
 
-    if(chart) chart.destroy();
-    chart=new Chart(ctx,{
-      type:'line',
-      data:{
-        labels:yearLabels(res.years),
-        datasets:[
-          {label:'Investing balance', data:invY, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2},
-          {label:'Savings balance',   data:savY, borderColor:getVar('--green'), backgroundColor:getVar('--greenFill'), fill:true, tension:.2}
-        ]
-      },
-      options:{
-        responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
-        plugins:{
-          legend:{labels:{color:getVar('--muted')}},
-          tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}
-        },
-        scales:{
-          x:{ticks:{color:getVar('--muted')}, grid:{color:getVar('--gridSoft')}},
-          y:{ticks:{color:getVar('--muted'), callback:(v)=>'$'+Intl.NumberFormat().format(v)}, grid:{color:getVar('--gridSoft')}}
-        },
-        elements:{point:{radius:0}}
+    // Set up input event listeners
+    fields.forEach(f=>{
+      const el=$(f); 
+      if(el){ 
+        el.addEventListener('input',saveInputs); 
+        el.addEventListener('change',saveInputs); 
       }
     });
+    
+    // Load saved inputs
+    loadInputs();
 
-    setStatus('Done');
-  }
+    // Slider <-> input synchronization
+    function syncPair(numId, sliderId){
+      const num=$(numId), rng=$(sliderId);
+      if (!num || !rng) return;
+      num.addEventListener('input',()=>{rng.value=num.value;});
+      rng.addEventListener('input',()=>{num.value=rng.value;});
+    }
+    syncPair('investPct','investSlider');
+    syncPair('savePct','saveSlider');
+
+    // Button handlers
+    const runBtn=$('run'), resetBtn=$('reset');
+    if (runBtn) {
+      runBtn.addEventListener('click',()=>{
+        const results = calculate();
+        if (results) {
+          render(results);
+        }
+      });
+    }
+    
+    if (resetBtn) {
+      resetBtn.addEventListener('click',()=>{
+        try {
+          localStorage.removeItem('futurecalc_inputs'); 
+          location.reload();
+        } catch(e) {
+          console.warn('Reset failed:', e);
+          // Fallback: just clear the form
+          fields.forEach(f => {
+            const el = $(f);
+            if (el) {
+              if (el.type === 'checkbox') {
+                el.checked = f === 'redirect'; // Default redirect to true
+              } else {
+                el.value = '';
+              }
+            }
+          });
+        }
+      });
+    }
+
+    // Auto-run if we have basic inputs
+    const grossEl = $('gross');
+    const expensesEl = $('monthlyExpenses');
+    if (grossEl?.value && expensesEl?.value) {
+      setTimeout(() => {
+        const results = calculate();
+        if (results) {
+          render(results);
+        }
+      }, 100); // Small delay to ensure everything is loaded
+    }
+  });
 </script>
 </body>
 </html>
