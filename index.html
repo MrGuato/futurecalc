@@ -256,6 +256,9 @@
   };
   const getVar=(name)=>getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#9fb2cc';
 
+  // ⭐ Define chart early so theme code can safely reference it
+  let chart = null;
+
   // ============== Theme handling (icon button cycles Auto → Light → Dark) ==============
   const THEME_KEY = 'futurecalc_theme';
   const themeModes = ['auto','light','dark'];
@@ -273,12 +276,11 @@
     localStorage.setItem(THEME_KEY, mode);
     const btn = $('themeBtn');
     if (btn){ btn.textContent = themeIcons[mode]; btn.setAttribute('aria-label', themeLabels[mode]); btn.title = themeLabels[mode]; }
-    if (typeof chart !== 'undefined' && chart) render(calculate());
+    if (chart) render(calculate());
   }
   function initTheme(){
     const saved = localStorage.getItem(THEME_KEY) || 'auto';
     applyTheme(saved);
-    // live update if in Auto and system toggles
     if (window.matchMedia) {
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{
         const current = localStorage.getItem(THEME_KEY) || 'auto';
@@ -387,7 +389,6 @@
 
   // ============== Render ==============
   const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
-  let chart;
 
   function render(res){
     if(!res) return;
