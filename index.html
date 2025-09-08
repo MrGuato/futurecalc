@@ -6,7 +6,7 @@
 <title>FutureCalc — Paycheck to Freedom</title>
 <meta name="description" content="FutureCalc helps professionals and millennials split each paycheck, build a 6-month emergency fund, and see long-term compounding." />
 
-<!-- Custom favicon/logo — replace href with your own path (ico/png/svg) -->
+<!-- Custom favicon/logo — replace href with your own path -->
 <link rel="icon" type="image/png" href="assets/favicon.png" />
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -39,9 +39,10 @@
 
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
-  header{padding:28px 18px 8px;text-align:center}
+  header{padding:28px 18px 8px;text-align:center;position:relative}
   header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
   header p{margin:0;color:var(--muted)}
+
   .wrap{max-width:1100px;margin:0 auto;padding:18px}
   .grid{display:grid;gap:16px;grid-template-columns:1fr}
   @media(min-width:960px){.grid{grid-template-columns:380px 1fr}}
@@ -65,14 +66,24 @@
   .footer{color:var(--muted);font-size:12px;margin-top:10px}
   .oplist{margin:10px 0 0;padding-left:18px}.oplist li{margin:6px 0}
   .tag{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-  .chart-box{position:relative;height:200px} /* compact chart */
+  .chart-box{position:relative;height:200px}
   .ef-wrap{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
   .bar{height:10px;background:var(--surfaceLow);border:1px solid var(--line);border-radius:999px;overflow:hidden}
   .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .4s ease}
   .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
   .mini .box{background:var(--surfaceLow);border:1px solid var(--line);border-radius:10px;padding:10px}
-  .mini .box .k{font-size:11px;color:var(--muted)} .mini .box .v{font-size:14px;margin-top:2px}
+  .mini .box .k{font-size:11px;color:var(--muted)}
+  .mini .box .v{font-size:14px;margin-top:2px}
   .tooltip{cursor:help;border-bottom:1px dotted var(--muted)}
+
+  /* Tiny theme icon button */
+  #themeBtn{
+    position:absolute;top:16px;right:16px;
+    width:34px;height:28px;display:inline-flex;align-items:center;justify-content:center;
+    border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);
+    font-size:14px;cursor:pointer;user-select:none;
+  }
+  #themeBtn:hover{box-shadow:0 0 0 3px var(--chip) inset}
 </style>
 </head>
 <body>
@@ -80,15 +91,8 @@
   <h1>FutureCalc</h1>
   <p>Split your paycheck, build a 6-month emergency fund, and watch compounding work for you.</p>
 
-  <!-- Theme selector -->
-  <div style="display:flex;justify-content:center;gap:8px;align-items:center;margin-top:6px">
-    <label for="themeMode" style="font-size:12px;color:var(--muted)">Theme</label>
-    <select id="themeMode" style="font-size:12px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)">
-      <option value="auto" selected>Auto</option>
-      <option value="light">Light</option>
-      <option value="dark">Dark</option>
-    </select>
-  </div>
+  <!-- Theme icon button (Auto → Light → Dark) -->
+  <button id="themeBtn" type="button" aria-label="Theme: Auto" title="Theme: Auto">A</button>
 </header>
 
 <div class="wrap">
@@ -227,6 +231,13 @@
         <div class="box"><div class="k">$250k invested</div><div class="v" id="mile250k">—</div></div>
         <div class="box"><div class="k">$500k invested</div><div class="v" id="mile500k">—</div></div>
       </div>
+
+      <p class="footer">
+        <strong>What is “6 months of living expenses”?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal.
+      </p>
+      <p class="footer">
+        Educational tool only. Returns aren’t guaranteed; personal situations vary.
+      </p>
     </section>
   </div>
 </div>
@@ -245,8 +256,12 @@
   };
   const getVar=(name)=>getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#9fb2cc';
 
-  // ============== Theme handling ==============
+  // ============== Theme handling (icon button cycles Auto → Light → Dark) ==============
   const THEME_KEY = 'futurecalc_theme';
+  const themeModes = ['auto','light','dark'];
+  const themeIcons = { auto:'A', light:'☀️', dark:'🌙' };
+  const themeLabels = { auto:'Theme: Auto', light:'Theme: Light', dark:'Theme: Dark' };
+
   function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
   function applyTheme(mode){
     const root = document.documentElement;
@@ -256,13 +271,14 @@
       root.setAttribute('data-theme', mode);
     }
     localStorage.setItem(THEME_KEY, mode);
+    const btn = $('themeBtn');
+    if (btn){ btn.textContent = themeIcons[mode]; btn.setAttribute('aria-label', themeLabels[mode]); btn.title = themeLabels[mode]; }
     if (typeof chart !== 'undefined' && chart) render(calculate());
   }
   function initTheme(){
     const saved = localStorage.getItem(THEME_KEY) || 'auto';
-    const sel = document.getElementById('themeMode');
-    if (sel) sel.value = saved;
     applyTheme(saved);
+    // live update if in Auto and system toggles
     if (window.matchMedia) {
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{
         const current = localStorage.getItem(THEME_KEY) || 'auto';
@@ -270,9 +286,15 @@
       });
     }
   }
+  function cycleTheme(){
+    const current = localStorage.getItem(THEME_KEY) || 'auto';
+    const idx = themeModes.indexOf(current);
+    const next = themeModes[(idx+1)%themeModes.length];
+    applyTheme(next);
+  }
+
   document.addEventListener('DOMContentLoaded', ()=>{
-    const sel = document.getElementById('themeMode');
-    if (sel) sel.addEventListener('change', (e)=> applyTheme(e.target.value));
+    $('themeBtn').addEventListener('click', cycleTheme);
     initTheme();
   });
 
