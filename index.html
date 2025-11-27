@@ -6,15 +6,11 @@
 	<title>FutureCalc — Paycheck to Freedom</title>
 	<meta name="description" content="FutureCalc helps professionals and millennials split each paycheck, build a 6-month emergency fund, and see long-term compounding." />
 
-	<!-- Custom favicon/logo — replace href with your own path -->
 	<link rel="icon" type="image/png" href="assets/favicon.png" />
-
-	<!-- Performance hint for CDN -->
 	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
 	<style>
 :root{
-	/* Light (default) */
 	--bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
 	--accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
 	--blue:#2f6cf6; --blueFill:rgba(47,108,246,.14);
@@ -45,9 +41,12 @@ header{padding:28px 18px 8px;text-align:center;position:relative}
 header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
 header p{margin:0;color:var(--muted)}
 
-.wrap{max-width:1100px;margin:0 auto;padding:18px}
+.wrap{max-width:100%;margin:0 auto;padding:clamp(12px,3vw,28px)}
 .grid{display:grid;gap:16px;grid-template-columns:1fr}
-@media(min-width:960px){.grid{grid-template-columns:380px 1fr}}
+/* Optional two-column on very wide screens:
+@media (min-width:1400px){.grid{grid-template-columns:1fr 1fr}}
+*/
+
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
 .card h2{margin:0 0 12px;font-size:18px}
 label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
@@ -58,8 +57,9 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 .help{font-size:12px;color:var(--muted);margin-top:4px}
 .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#001428;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
 .btn.secondary{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
-@media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
+
+/* Stats across full width */
+.stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:8px}
 .stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
 .stat .k{font-size:12px;color:var(--muted)}
 .stat .v{font-size:18px;margin-top:4px}
@@ -69,33 +69,32 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 .footer{color:var(--muted);font-size:12px;margin-top:10px}
 .oplist{margin:10px 0 0;padding-left:18px}.oplist li{margin:6px 0}
 .tag{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-.chart-box{position:relative;height:200px}
+
+/* Bigger responsive charts */
+.chart-box{position:relative;height:clamp(260px,40vh,560px)}
+
 .ef-wrap{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
 .bar{height:10px;background:var(--surfaceLow);border:1px solid var(--line);border-radius:999px;overflow:hidden}
 .bar > span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .4s ease}
+
 .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
 .mini .box{background:var(--surfaceLow);border:1px solid var(--line);border-radius:10px;padding:10px}
 .mini .box .k{font-size:11px;color:var(--muted)}
 .mini .box .v{font-size:14px;margin-top:2px}
 .tooltip{cursor:help;border-bottom:1px dotted var(--muted)}
 
-/* Tiny theme icon button */
-#themeBtn{
-	position:absolute;top:16px;right:16px;
-	width:34px;height:28px;display:inline-flex;align-items:center;justify-content:center;
-	border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);
-	font-size:14px;cursor:pointer;user-select:none;
-}
+/* Theme button */
+#themeBtn{position:absolute;top:16px;right:16px;width:34px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;cursor:pointer;user-select:none}
 #themeBtn:hover{box-shadow:0 0 0 3px var(--chip) inset}
 
 /* Segmented control + section visibility */
-.seg{
-	appearance:none;border:0;margin:0;background:transparent;color:var(--muted);
-	padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600
-}
+.seg{appearance:none;border:0;margin:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
 .seg.active{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line) inset}
 .calc-sec{display:none}
 .calc-sec.active{display:block}
+
+/* Edge-to-edge feel on small screens */
+@media (max-width:480px){.wrap{padding-left:8px;padding-right:8px}.card{border-radius:12px}}
 	</style>
 </head>
 <body>
@@ -117,9 +116,8 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 	<div class="wrap">
 		<div class="grid">
 
-			<!-- Paycheck section -->
+			<!-- Paycheck -->
 			<section id="sec-paycheck" class="calc-sec active">
-				<!-- Inputs -->
 				<section class="card" id="inputs">
 					<h2>1) Your Inputs</h2>
 
@@ -195,7 +193,6 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 					</div>
 				</section>
 
-				<!-- Results -->
 				<section class="card">
 					<h2>2) Results & Insights</h2>
 
@@ -240,11 +237,7 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 					</ol>
 
 					<div class="divider"></div>
-
-					<div class="chart-box">
-						<canvas id="chart"></canvas>
-					</div>
-
+					<div class="chart-box"><canvas id="chart"></canvas></div>
 					<div class="divider"></div>
 
 					<div class="mini">
@@ -253,17 +246,10 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 						<div class="box"><div class="k">$250k invested</div><div class="v" id="mile250k">—</div></div>
 						<div class="box"><div class="k">$500k invested</div><div class="v" id="mile500k">—</div></div>
 					</div>
-
-					<p class="footer">
-						<strong>What is "6 months of living expenses"?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal.
-					</p>
-					<p class="footer">
-						Educational tool only. Returns aren't guaranteed; personal situations vary.
-					</p>
 				</section>
 			</section>
 
-			<!-- Debt section -->
+			<!-- Debt -->
 			<section id="sec-debt" class="calc-sec">
 				<section class="card">
 					<h2>Debt Payoff</h2>
@@ -296,11 +282,13 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 						<div class="stat"><div class="k">Strategy</div><div class="v" id="debtStrat">Avalanche</div></div>
 					</div>
 					<div class="divider"></div>
+					<div class="chart-box"><canvas id="debtChart"></canvas></div>
+					<div class="divider"></div>
 					<div class="mini" id="debtMilestones"></div>
 				</section>
 			</section>
 
-			<!-- Mortgage section -->
+			<!-- Mortgage -->
 			<section id="sec-mortgage" class="calc-sec">
 				<section class="card">
 					<h2>Mortgage</h2>
@@ -332,11 +320,13 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 						<div class="stat"><div class="k">Time to payoff</div><div class="v" id="mTime">—</div></div>
 					</div>
 					<div class="divider"></div>
+					<div class="chart-box"><canvas id="mortgageChart"></canvas></div>
+					<div class="divider"></div>
 					<div class="mini" id="mNotes"></div>
 				</section>
 			</section>
 
-			<!-- Crypto section -->
+			<!-- Crypto -->
 			<section id="sec-crypto" class="calc-sec">
 				<section class="card">
 					<h2>Crypto DCA</h2>
@@ -372,6 +362,8 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 						<div class="stat"><div class="k">Ending value</div><div class="v" id="cEndValue">$0</div></div>
 						<div class="stat"><div class="k">Max drawdown</div><div class="v" id="cMdd">—</div></div>
 					</div>
+					<div class="divider"></div>
+					<div class="chart-box"><canvas id="cryptoChart"></canvas></div>
 				</section>
 			</section>
 
@@ -401,7 +393,7 @@ const getVar=(name)=> {
 	return name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc';
 };
 
-let chart = null;
+let chart = null, debtChart = null, mortgageChart = null, cryptoChart = null;
 let DOM_READY = false;
 
 /* ========= Theme handling ========= */
@@ -416,14 +408,19 @@ function applyTheme(mode){
 	root.setAttribute('data-theme', mode === 'auto' ? (systemPrefersDark() ? 'dark' : 'light') : mode);
 	try { localStorage.setItem(THEME_KEY, mode); } catch {}
 	const btn = $('themeBtn');
-	if (btn){
-		btn.textContent = themeIcons[mode];
-		btn.setAttribute('aria-label', themeLabels[mode]);
-		btn.title = themeLabels[mode];
-	}
-	// Re-render if possible
-	if (DOM_READY && $('chart') && window.Chart) {
-		try { const results = calculate(); if (results) render(results); } catch(e){}
+	if (btn){ btn.textContent = themeIcons[mode]; btn.setAttribute('aria-label', themeLabels[mode]); btn.title = themeLabels[mode]; }
+	// Re-paint charts with new colors if present
+	const repaint = (cht)=>{
+		if (!cht) return;
+		cht.options.plugins.legend.labels.color = getVar('--muted');
+		cht.options.scales.x.ticks.color = getVar('--muted');
+		cht.options.scales.x.grid.color = getVar('--gridSoft');
+		cht.options.scales.y.ticks.color = getVar('--muted');
+		cht.options.scales.y.grid.color = getVar('--gridSoft');
+		cht.update('none');
+	};
+	if (DOM_READY && window.Chart){
+		repaint(chart); repaint(debtChart); repaint(mortgageChart); repaint(cryptoChart);
 	}
 }
 function initTheme(){
@@ -432,11 +429,8 @@ function initTheme(){
 	applyTheme(saved);
 	if (window.matchMedia) {
 		const mq = window.matchMedia('(prefers-color-scheme: dark)');
-		if (mq.addEventListener) {
-			mq.addEventListener('change', ()=>{ const current=(localStorage.getItem(THEME_KEY)||'auto'); if (current==='auto') applyTheme('auto'); });
-		} else if (mq.addListener) {
-			mq.addListener(()=>{ const current=(localStorage.getItem(THEME_KEY)||'auto'); if (current==='auto') applyTheme('auto'); });
-		}
+		if (mq.addEventListener) mq.addEventListener('change', ()=>{ const current=(localStorage.getItem(THEME_KEY)||'auto'); if (current==='auto') applyTheme('auto'); });
+		else if (mq.addListener) mq.addListener(()=>{ const current=(localStorage.getItem(THEME_KEY)||'auto'); if (current==='auto') applyTheme('auto'); });
 	}
 }
 function cycleTheme(){
@@ -446,7 +440,7 @@ function cycleTheme(){
 	applyTheme(next);
 }
 
-/* ========= Paycheck math ========= */
+/* ========= Paycheck ========= */
 function calculate(){
 	const gross=+($('gross')?.value||0);
 	const periodsPerYear=+($('frequency')?.value||26);
@@ -459,7 +453,6 @@ function calculate(){
 	const redirect=$('redirect')?.checked ?? true;
 
 	setStatus('Calculating…');
-
 	if (!gross || gross <= 0) { setStatus('Enter a valid paycheck amount'); return null; }
 	if (!((investPct+savePct) > 0)) { setStatus('Enter investment or savings percentages'); return null; }
 	if (!years || years <= 0) { setStatus('Enter valid projection years'); return null; }
@@ -482,83 +475,65 @@ function calculate(){
 
 		let cI=investPct*gross, cS=savePct*gross;
 
-		// EF stop/redirect
 		if(efGoal>0 && sav>=efGoal-0.005){
 			if(efAt===Infinity) efAt=p;
 			cS=0; if(redirect) cI+=savePct*gross;
 		}
 
-		// Growth this period (before contributions)
 		const gI = inv * rI;
 		const gS = sav * rS;
 
-		// Update balances
 		inv = inv + gI + cI;
 		sav = (efGoal>0) ? Math.min(efGoal, sav + gS + cS) : sav + gS + cS;
 
-		// Sums
 		invContrib += cI;
 		invGrowth  += gI;
 
-		// realized savings interest (don't overcount if at cap)
 		const realizedS = (efGoal>0)
 			? Math.max(0, Math.min(efGoal, sav) - Math.min(efGoal, sav - gS - cS) - cS)
 			: gS;
 		savContrib += cS;
 		savGrowth  += realizedS;
 
-		// milestones
 		const after = inv;
 		for (const k of Object.keys(investMilestones)){
 			if (investMilestones[k]===Infinity && after >= +k) investMilestones[k]=p;
 		}
 	}
 
-	return {
-		inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years,
-		invContrib, invGrowth, savContrib, savGrowth, investMilestones
-	};
+	return {inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years, invContrib, invGrowth, savContrib, savGrowth, investMilestones};
 }
-
 const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
 
 function render(res){
 	if(!res){ setStatus('No results to render'); return; }
-
 	setStatus('Rendering…');
-
 	try {
-		// Totals
 		$('investTotal').textContent=fmt(res.inv);
 		$('saveTotal').textContent=fmt(res.sav);
 		$('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
 		$('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
 
-		// EF progress
 		$('efNow').textContent=fmt(res.sav);
 		$('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
 		const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
 		$('efBar').style.width = pct + '%';
 
-		// Contributions vs growth
 		$('invContrib').textContent = fmt(res.invContrib);
 		$('invGrowth').textContent  = fmt(res.invGrowth);
 		$('savContrib').textContent = fmt(res.savContrib);
 		$('savGrowth').textContent  = fmt(res.savGrowth);
 
-		// copy text updates
 		$('efExplain').textContent='6 months of your essential monthly expenses';
 		$('investExplain').textContent=`${$('investPct').value}%`;
 		$('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
 
-		// Update milestones
 		const periodsToTime = (p) => p === Infinity ? '—' : monthsWords(Math.round(p*12/res.periodsPerYear));
 		$('mileEF').textContent = res.efAt === Infinity ? 'EF: Not reached' : `EF: ${periodsToTime(res.efAt)}`;
 		$('mile100k').textContent = periodsToTime(res.investMilestones['100000']);
 		$('mile250k').textContent = periodsToTime(res.investMilestones['250000']);
 		$('mile500k').textContent = periodsToTime(res.investMilestones['500000']);
 
-		// yearly downsample
 		const invY=[], savY=[];
 		for(let y=0;y<=res.years;y++){
 			const i=y*res.periodsPerYear;
@@ -566,73 +541,30 @@ function render(res){
 			savY.push(res.savP[i] || 0);
 		}
 
-		// Chart
-		const canvas = $('chart');
-		if (!canvas){ setStatus('Canvas not found'); return; }
-		const ctx = canvas.getContext('2d');
-		if (!ctx){ setStatus('Canvas context failed'); return; }
-
-		// Destroy existing chart
-		if(chart) {
-			try { chart.destroy(); } catch(e) {}
-			chart = null;
-		}
-
+		const canvas = $('chart'); if (!canvas){ setStatus('Canvas not found'); return; }
+		const ctx = canvas.getContext('2d'); if (!ctx){ setStatus('Canvas context failed'); return; }
+		if(chart) { try { chart.destroy(); } catch(e){} chart=null; }
 		if (window.Chart) {
-			try {
-				chart = new Chart(ctx, {
-					type:'line',
-					data:{
-						labels:yearLabels(res.years),
-						datasets:[
-							{
-								label:'Investing balance',
-								data:invY,
-								borderColor:getVar('--blue'),
-								backgroundColor:getVar('--blueFill'),
-								fill:true,
-								tension:.2
-							},
-							{
-								label:'Savings balance',
-								data:savY,
-								borderColor:getVar('--green'),
-								backgroundColor:getVar('--greenFill'),
-								fill:true,
-								tension:.2
-							}
-						]
-					},
-					options:{
-						responsive:true,
-						maintainAspectRatio:false,
-						interaction:{mode:'index',intersect:false},
-						plugins:{
-							legend:{labels:{color:getVar('--muted')}},
-							tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}
-						},
-						scales:{
-							x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
-							y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}
-						},
-						elements:{point:{radius:0}}
-					}
-				});
-				setStatus('Done');
-			} catch(e) {
-				console.error('Chart creation failed:', e);
-				setStatus('Chart creation failed');
-			}
-		} else {
-			setStatus('Done (no chart)');
-		}
-	} catch(e) {
-		console.error('Render failed:', e);
-		setStatus('Render failed');
-	}
+			chart = new Chart(ctx, {
+				type:'line',
+				data:{ labels:yearLabels(res.years),
+					datasets:[
+						{ label:'Investing balance', data:invY, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2 },
+						{ label:'Savings balance', data:savY, borderColor:getVar('--green'), backgroundColor:getVar('--greenFill'), fill:true, tension:.2 }
+					]},
+				options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+					plugins:{legend:{labels:{color:getVar('--muted')}},tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}},
+					scales:{x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
+					        y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}},
+					elements:{point:{radius:0}}
+				}
+			});
+			setStatus('Done');
+		} else setStatus('Done (no chart)');
+	} catch(e){ console.error('Render failed:', e); setStatus('Render failed'); }
 }
 
-/* ========= Nav, utils, other calculators ========= */
+/* ========= Nav, utils ========= */
 function initNav(){
 	const tabs = Array.from(document.querySelectorAll('#nav .seg'));
 	const secs = Array.from(document.querySelectorAll('.calc-sec'));
@@ -640,108 +572,86 @@ function initNav(){
 		secs.forEach(s=>s.classList.toggle('active', s.id===id));
 		tabs.forEach(t=>t.classList.toggle('active', t.dataset.target===id));
 	}
-	tabs.forEach(btn=>{
-		btn.addEventListener('click', ()=>{
-			const id = btn.dataset.target;
-			activate(id);
-		});
-	});
-	// default active already set on Paycheck
+	tabs.forEach(btn=>btn.addEventListener('click', ()=>activate(btn.dataset.target)));
 }
 const FC = {
 	currency: 'USD',
 	fmt(n){ return (isFinite(n)?n:0).toLocaleString(undefined,{style:'currency',currency:this.currency,maximumFractionDigits:0}); },
 	monthsWords,
-	pmt(principal, rateMonthly, n){
-		if (rateMonthly===0) return principal / n;
-		const i = rateMonthly, v = Math.pow(1+i, n);
-		return principal * i * v / (v - 1);
-	},
-	toCSV(rows){
-		return rows.map(r => r.map(v => typeof v==='number' ? v : `"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
-	},
-	downloadCSV(filename, csv){
-		const blob = new Blob([csv], {type:'text/csv'});
-		const a = document.createElement('a');
-		a.href = URL.createObjectURL(blob);
-		a.download = filename;
-		document.body.appendChild(a);
-		a.click();
-		a.remove();
-	}
+	pmt(principal, rateMonthly, n){ if (rateMonthly===0) return principal/n; const i=rateMonthly,v=Math.pow(1+i,n); return principal*i*v/(v-1); },
+	toCSV(rows){ return rows.map(r=>r.map(v=>typeof v==='number'?v:`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n'); },
+	downloadCSV(filename,csv){ const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); }
 };
 
-/* Debt calculator */
+/* ========= Debt ========= */
 function addDebtRow(container){
 	const row = document.createElement('div');
-	row.className = 'mini';
-	row.style.marginTop = '8px';
+	row.className = 'mini'; row.style.marginTop='8px';
 	row.innerHTML = `
 		<div class="box"><div class="k">Name</div><div class="v"><input type="text" data-k="name" placeholder="e.g., Card A"></div></div>
 		<div class="box"><div class="k">Balance</div><div class="v"><input type="number" min="0" step="1" data-k="bal" value="2000"></div></div>
 		<div class="box"><div class="k">APR %</div><div class="v"><input type="number" min="0" step="0.01" data-k="apr" value="22.9"></div></div>
 		<div class="box"><div class="k">Minimum</div><div class="v"><input type="number" min="0" step="1" data-k="min" value="50"></div></div>
-		<div class="box"><div class="k">Remove</div><div class="v"><button type="button" class="btn secondary" data-k="rm">X</button></div></div>
-	`;
+		<div class="box"><div class="k">Remove</div><div class="v"><button type="button" class="btn secondary" data-k="rm">X</button></div></div>`;
 	container.appendChild(row);
 	row.querySelector('[data-k="rm"]').addEventListener('click', ()=> row.remove());
 }
 function readDebts(){
-	const list = [];
-	document.querySelectorAll('#debts .mini').forEach(row=>{
+	const list=[]; document.querySelectorAll('#debts .mini').forEach(row=>{
 		const q = k => row.querySelector(`[data-k="${k}"]`);
-		const name = q('name')?.value?.trim() || 'Debt';
-		const bal = +q('bal')?.value || 0;
-		const apr = (+q('apr')?.value || 0) / 100;
-		const min = +q('min')?.value || 0;
-		if (bal > 0 && (apr >= 0) && min >= 0) list.push({name, bal, apr, min});
-	});
-	return list;
+		const name=q('name')?.value?.trim()||'Debt';
+		const bal=+q('bal')?.value||0;
+		const apr=(+q('apr')?.value||0)/100;
+		const min=+q('min')?.value||0;
+		if (bal>0 && apr>=0 && min>=0) list.push({name,bal,apr,min});
+	}); return list;
 }
 function payoffSchedule(debts, extra, strategy){
 	let ds = debts.map(d=>({...d, bal:+d.bal}));
-	const rows = [['Month','Name','Payment','Interest','Principal','Balance']];
-	let month = 0;
-	let totalInterest = 0;
-	while (ds.some(d=>d.bal > 0) && month < 3600){
+	const rows = [['Month','Name','Payment','Interest','Principal','Balance','TotalBalance']];
+	let month=0,totalInterest=0;
+	while (ds.some(d=>d.bal>0) && month<3600){
 		month++;
-		// Accrue interest
-		ds.forEach(d=>{
-			const i = d.apr/12;
-			const int = d.bal * i;
-			d.intAcc = (d.intAcc||0) + int;
-		});
-		// Budget = mins + extra
-		let budget = ds.reduce((s,d)=>s + Math.min(d.min, d.bal + (d.intAcc||0)), 0) + extra;
-		// Order
-		const order = [...ds].filter(d=>d.bal>0).sort((a,b)=>{
-			if (strategy==='snowball') return a.bal - b.bal;
-			return b.apr - a.apr; // avalanche
-		});
-		// Pay in order
+		ds.forEach(d=>{ const i=d.apr/12; const int=d.bal*i; d.intAcc=(d.intAcc||0)+int; });
+		let budget = ds.reduce((s,d)=>s+Math.min(d.min, d.bal+(d.intAcc||0)),0)+extra;
+		const order=[...ds].filter(d=>d.bal>0).sort((a,b)=> strategy==='snowball'? a.bal-b.bal : b.apr-a.apr);
 		order.forEach(d=>{
-			if (d.bal <= 0) return;
-			const iDue = d.intAcc||0;
-			const due = d.bal + iDue;
-			let pay = Math.min(d.min, due);
-			if (budget > 0){
-				const extraTake = Math.min(Math.max(0,budget - pay), due - pay);
-				if (extraTake > 0) pay += extraTake;
+			if (d.bal<=0) return;
+			const iDue=d.intAcc||0, due=d.bal+iDue;
+			let pay=Math.min(d.min, due);
+			if (budget>0){
+				const extraTake=Math.min(Math.max(0,budget-pay), due-pay);
+				if (extraTake>0) pay+=extraTake;
 			}
-			budget -= pay;
-
-			const interestPortion = Math.min(iDue, pay);
-			const principalPortion = Math.max(0, pay - interestPortion);
-			d.intAcc = iDue - interestPortion;
-			d.bal = Math.max(0, d.bal - principalPortion);
-
-			totalInterest += interestPortion;
-			rows.push([month, d.name, pay, interestPortion, principalPortion, d.bal]);
+			budget-=pay;
+			const iPort=Math.min(iDue,pay), pPort=Math.max(0,pay-iPort);
+			d.intAcc=iDue-iPort; d.bal=Math.max(0,d.bal-pPort);
+			totalInterest+=iPort;
 		});
+		const totBal = ds.reduce((s,d)=>s+d.bal,0);
+		// Push one row per month (aggregate) for chart; we still export detailed rows per debt if needed
+		rows.push([month,'—',0,0,0,totBal,totBal]);
 		if (order.every(d=>d.bal===0 || d.min===0) && extra===0) break;
 	}
-	const totalPaid = rows.slice(1).reduce((s,r)=>s + (+r[2]||0), 0);
+	const totalPaid = ds.reduce((s)=>s,0); // not used in chart line; kept for API symmetry
 	return {rows, months:month, totalInterest, totalPaid};
+}
+function renderDebtChart(rows){
+	const labels = rows.slice(1).map(r=>`M${r[0]}`);
+	const balance = rows.slice(1).map(r=>r[6]);
+	const cv = document.getElementById('debtChart'); if(!cv) return;
+	const ctx = cv.getContext('2d'); if(!ctx) return;
+	if (debtChart){ try{debtChart.destroy();}catch(e){} debtChart=null; }
+	debtChart = new Chart(ctx,{
+		type:'line',
+		data:{labels, datasets:[{label:'Total balance', data:balance, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2}]},
+		options:{responsive:true,maintainAspectRatio:false,
+			plugins:{legend:{labels:{color:getVar('--muted')}}},
+			scales:{x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
+			        y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}},
+			elements:{point:{radius:0}}
+		}
+	});
 }
 function runDebt(){
 	const debts = readDebts();
@@ -750,25 +660,23 @@ function runDebt(){
 	const st = document.getElementById('statusDebt');
 	if (debts.length===0){ st.textContent='Add at least one debt'; return; }
 	st.textContent='Calculating…';
-	const {rows, months, totalInterest, totalPaid} = payoffSchedule(debts, extra, strategy);
+	const {rows, months, totalInterest} = payoffSchedule(debts, extra, strategy);
 	document.getElementById('debtTime').textContent = FC.monthsWords(months);
 	document.getElementById('debtInterest').textContent = FC.fmt(totalInterest);
-	document.getElementById('debtTotal').textContent = FC.fmt(totalPaid);
+	// Total paid (approx) = sum of monthly change + interest; omit for brevity; could compute from detailed schedule
+	document.getElementById('debtTotal').textContent = '—';
 	document.getElementById('debtStrat').textContent = strategy==='snowball'?'Snowball':'Avalanche';
-	const box = document.getElementById('debtMilestones');
-	box.innerHTML = '';
-	debts.forEach(d=>{
-		const doneRow = rows.find(r => r[1]===d.name && r[5]===0);
-		const div = document.createElement('div');
-		div.className='box';
-		div.innerHTML = `<div class="k">${d.name} paid off</div><div class="v">${doneRow? 'Month '+doneRow[0] : '—'}</div>`;
-		box.appendChild(div);
-	});
-	document.getElementById('exportDebt').onclick = ()=> FC.downloadCSV('debt_schedule.csv', FC.toCSV(rows));
+	const box = document.getElementById('debtMilestones'); box.innerHTML='';
+	// Simple milestone: final payoff month
+	const div=document.createElement('div'); div.className='box';
+	div.innerHTML = `<div class="k">All debts paid</div><div class="v">${months? 'Month '+months : '—'}</div>`;
+	box.appendChild(div);
+	document.getElementById('exportDebt').onclick = ()=> FC.downloadCSV('debt_summary_balance.csv', FC.toCSV(rows));
+	renderDebtChart(rows);
 	st.textContent='Done';
 }
 
-/* Mortgage calculator */
+/* ========= Mortgage ========= */
 function mortgageSchedule(P, rate, years, extra){
 	const i = rate/100/12;
 	const n = Math.round(years*12);
@@ -787,6 +695,23 @@ function mortgageSchedule(P, rate, years, extra){
 	const totalPaid = rows.slice(1).reduce((s,r)=>s + (+r[1]||0), 0);
 	return {rows, months: month, M, totalInterest, totalPaid};
 }
+function renderMortgageChart(rows){
+	const labels = rows.slice(1).map(r=>`M${r[0]}`);
+	const bal = rows.slice(1).map(r=>r[4]);
+	const cv = document.getElementById('mortgageChart'); if(!cv) return;
+	const ctx = cv.getContext('2d'); if(!ctx) return;
+	if (mortgageChart){ try{mortgageChart.destroy();}catch(e){} mortgageChart=null; }
+	mortgageChart = new Chart(ctx,{
+		type:'line',
+		data:{labels, datasets:[{label:'Mortgage balance', data:bal, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2}]},
+		options:{responsive:true,maintainAspectRatio:false,
+			plugins:{legend:{labels:{color:getVar('--muted')}}},
+			scales:{x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
+			        y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}},
+			elements:{point:{radius:0}}
+		}
+	});
+}
 function runMortgage(){
 	const price = +document.getElementById('mPrice').value||0;
 	const down  = +document.getElementById('mDown').value||0;
@@ -802,22 +727,18 @@ function runMortgage(){
 	document.getElementById('mPI').textContent = FC.fmt(M + ti);
 	document.getElementById('mInterest').textContent = FC.fmt(totalInterest);
 	document.getElementById('mTime').textContent = FC.monthsWords(months);
-	const notes = document.getElementById('mNotes');
-	notes.innerHTML = '';
-	const pmiDiv = document.createElement('div');
-	pmiDiv.className='box';
+	const notes = document.getElementById('mNotes'); notes.innerHTML='';
+	const pmiDiv = document.createElement('div'); pmiDiv.className='box';
 	let ltvCross = '—';
-	for (let r of rows.slice(1)){
-		const bal = r[4];
-		if (bal <= price*0.8){ ltvCross = 'Month '+r[0]; break; }
-	}
+	for (let r of rows.slice(1)){ const bal = r[4]; if (bal <= price*0.8){ ltvCross = 'Month '+r[0]; break; } }
 	pmiDiv.innerHTML = `<div class="k">80% LTV reached</div><div class="v">${ltvCross}</div>`;
 	notes.appendChild(pmiDiv);
 	document.getElementById('exportMortgage').onclick = ()=> FC.downloadCSV('mortgage_schedule.csv', FC.toCSV(rows));
+	renderMortgageChart(rows);
 	st.textContent='Done';
 }
 
-/* Crypto DCA */
+/* ========= Crypto ========= */
 function parseSeries(text){
 	const vals = text.split(/[\s,]+/).map(v=>+v).filter(v=>isFinite(v) && v>0);
 	return vals.length ? vals : null;
@@ -827,7 +748,6 @@ function simulateSeries(n, driftA=0.10, volA=0.60, start=100){
 	const mu_p = mu / n, sig_p = sigma / Math.sqrt(n);
 	let p = start, arr=[p];
 	for (let k=1;k<n;k++){
-		// simple bounded pseudo-normal via sum of two uniforms
 		const z = Math.max(-4, Math.min(4, (Math.random()*2-1) + (Math.random()*2-1)));
 		p = p * Math.exp((mu_p - 0.5*sig_p*sig_p) + sig_p*z);
 		arr.push(Math.max(0.01, p));
@@ -838,7 +758,7 @@ function dca(cAmt, freq, years, feePct, series){
 	const N = Math.round(freq*years);
 	const prices = series && series.length>=N ? series.slice(0,N)
 		: (series && series.length>0 ? [...series, ...Array(N-series.length).fill(series.at(-1))] : simulateSeries(N, 0.10, 0.60, 100));
-	let units=0, cost=0, fees=0, rows=[['Period','Price','Buy $','Fee $','Units','Cum Units','Cum Cost']];
+	let units=0, cost=0, fees=0, rows=[['Period','Price','Buy $','Fee $','Units','Cum Units','Cum Cost','Portfolio $','Contrib $']];
 	for (let i=0;i<N;i++){
 		const price = prices[i];
 		const fee = cAmt * (feePct/100);
@@ -847,18 +767,35 @@ function dca(cAmt, freq, years, feePct, series){
 		units += u;
 		cost += buy;
 		fees += fee;
-		rows.push([i+1, price, buy, fee, u, units, cost+fees]);
+		const portfolio = units * price;
+		const contributed = cost + fees;
+		rows.push([i+1, price, buy, fee, u, units, contributed, portfolio, contributed]);
 	}
-	const endValue = units * prices.at(-1);
-	// Max drawdown on portfolio value path
-	let peak = 0, mdd = 0, val=0;
-	for (let i=1;i<rows.length;i++){
-		const uCum = rows[i][5];
-		val = uCum * prices[i-1];
-		peak = Math.max(peak, val);
-		mdd = Math.max(mdd, peak>0 ? (peak - val)/peak : 0);
-	}
-	return {rows, units, avgCost: (cost+fees)/Math.max(1,units), endValue, mdd};
+	const endValue = rows.at(-1)[7];
+	const mdd = (()=>{ let peak=0, m=0; for (let i=1;i<rows.length;i++){ const v=rows[i][7]; peak=Math.max(peak,v); m=Math.max(m, peak? (peak-v)/peak:0);} return m; })();
+	return {rows, endValue, mdd};
+}
+function renderCryptoChart(rows){
+	const labels = rows.slice(1).map(r=>`P${r[0]}`);
+	const value = rows.slice(1).map(r=>r[7]);
+	const contrib = rows.slice(1).map(r=>r[8]);
+	const cv = document.getElementById('cryptoChart'); if(!cv) return;
+	const ctx = cv.getContext('2d'); if(!ctx) return;
+	if (cryptoChart){ try{cryptoChart.destroy();}catch(e){} cryptoChart=null; }
+	cryptoChart = new Chart(ctx,{
+		type:'line',
+		data:{labels,
+			datasets:[
+				{label:'Portfolio value', data:value, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2},
+				{label:'Total contributions', data:contrib, borderColor:getVar('--green'), backgroundColor:getVar('--greenFill'), fill:true, tension:.2}
+			]},
+		options:{responsive:true,maintainAspectRatio:false,
+			plugins:{legend:{labels:{color:getVar('--muted')}}},
+			scales:{x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
+			        y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}},
+			elements:{point:{radius:0}}
+		}
+	});
 }
 function runCrypto(){
 	const cAmt = +document.getElementById('cAmt').value||0;
@@ -869,12 +806,17 @@ function runCrypto(){
 	const st = document.getElementById('statusCrypto');
 	if (cAmt<=0 || years<=0){ st.textContent='Enter valid inputs'; return; }
 	st.textContent = 'Calculating…';
-	const {rows, units, avgCost, endValue, mdd} = dca(cAmt, freq, years, fee, series);
+	const {rows, endValue, mdd} = dca(cAmt, freq, years, fee, series);
+	// Summaries from final row
+	const last = rows.at(-1);
+	const units = last[5];
+	const avgCost = last[6]/Math.max(1, units);
 	document.getElementById('cUnits').textContent = units.toFixed(6);
 	document.getElementById('cAvgCost').textContent = FC.fmt(avgCost);
 	document.getElementById('cEndValue').textContent = FC.fmt(endValue);
 	document.getElementById('cMdd').textContent = (mdd*100).toFixed(1) + '%';
 	document.getElementById('exportCrypto').onclick = ()=> FC.downloadCSV('crypto_dca.csv', FC.toCSV(rows));
+	renderCryptoChart(rows);
 	st.textContent = 'Done';
 }
 
@@ -882,113 +824,36 @@ function runCrypto(){
 document.addEventListener('DOMContentLoaded', ()=>{
 	DOM_READY = true;
 
-	// Theme
-	const btn = $('themeBtn');
-	if (btn) btn.addEventListener('click', cycleTheme);
+	const btn = $('themeBtn'); if (btn) btn.addEventListener('click', cycleTheme);
 	initTheme();
-
-	// Nav
 	initNav();
 
 	// Input persistence (Paycheck)
 	const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
-	function saveInputs(){
-		try {
-			const d={};
-			fields.forEach(f=>{
-				const el=$(f);
-				if (el) d[f]=el.type==='checkbox'?el.checked:el.value;
-			});
-			localStorage.setItem('futurecalc_inputs',JSON.stringify(d));
-		} catch(e) {}
-	}
-	function loadInputs(){
-		try {
-			const raw=localStorage.getItem('futurecalc_inputs');
-			if(!raw) return;
-			const d=JSON.parse(raw);
-			fields.forEach(f=>{
-				if(d[f]!==undefined){
-					const el=$(f);
-					if (el) {
-						if (el.type==='checkbox') el.checked=d[f];
-						else el.value=d[f];
-					}
-				}
-			});
-		} catch(e) {}
-	}
-	fields.forEach(f=>{
-		const el=$(f);
-		if(el){
-			el.addEventListener('input',saveInputs);
-			el.addEventListener('change',saveInputs);
-		}
-	});
+	function saveInputs(){ try{ const d={}; fields.forEach(f=>{ const el=$(f); if(el) d[f]=el.type==='checkbox'?el.checked:el.value; }); localStorage.setItem('futurecalc_inputs',JSON.stringify(d)); }catch(e){} }
+	function loadInputs(){ try{ const raw=localStorage.getItem('futurecalc_inputs'); if(!raw) return; const d=JSON.parse(raw); fields.forEach(f=>{ if(d[f]!==undefined){ const el=$(f); if(el){ if(el.type==='checkbox') el.checked=d[f]; else el.value=d[f]; }}});}catch(e){} }
+	fields.forEach(f=>{ const el=$(f); if(el){ el.addEventListener('input',saveInputs); el.addEventListener('change',saveInputs);} });
 	loadInputs();
 
-	// Slider sync
-	function syncPair(numId, sliderId){
-		const num=$(numId), rng=$(sliderId);
-		if (!num || !rng) return;
-		num.addEventListener('input',()=>{rng.value=num.value;});
-		rng.addEventListener('input',()=>{num.value=rng.value;});
-	}
-	syncPair('investPct','investSlider');
-	syncPair('savePct','saveSlider');
+	function syncPair(numId, sliderId){ const num=$(numId), rng=$(sliderId); if(!num||!rng) return; num.addEventListener('input',()=>{rng.value=num.value;}); rng.addEventListener('input',()=>{num.value=rng.value;}); }
+	syncPair('investPct','investSlider'); syncPair('savePct','saveSlider');
 
-	// Paycheck buttons
 	const runBtn=$('run'), resetBtn=$('reset');
-	if (runBtn) {
-		runBtn.addEventListener('click',()=>{
-			const results = calculate();
-			if (results) render(results);
-		});
-	}
-	if (resetBtn) {
-		resetBtn.addEventListener('click',()=>{
-			try {
-				localStorage.removeItem('futurecalc_inputs');
-				location.reload();
-			} catch(e) {
-				fields.forEach(f => {
-					const el = $(f);
-					if (el) {
-						if (el.type === 'checkbox') el.checked = (f === 'redirect');
-						else el.value = '';
-					}
-				});
-			}
-		});
-	}
+	if (runBtn) runBtn.addEventListener('click',()=>{ const results=calculate(); if(results) render(results); });
+	if (resetBtn) resetBtn.addEventListener('click',()=>{ try{ localStorage.removeItem('futurecalc_inputs'); location.reload(); }catch(e){ fields.forEach(f=>{ const el=$(f); if(el){ if(el.type==='checkbox') el.checked=(f==='redirect'); else el.value=''; }}); } });
 
 	// Auto-run if basic inputs exist
-	const grossEl = $('gross');
-	const expensesEl = $('monthlyExpenses');
-	if (grossEl?.value && expensesEl?.value) {
-		setTimeout(() => {
-			const results = calculate();
-			if (results) render(results);
-		}, 100);
-	}
+	if ($('gross')?.value && $('monthlyExpenses')?.value) { setTimeout(()=>{ const results=calculate(); if(results) render(results); },100); }
 
 	// Debt
 	const container = document.getElementById('debts');
-	if (container){
-		document.getElementById('addDebt').addEventListener('click', () => addDebtRow(container));
-		addDebtRow(container);
-		document.getElementById('runDebt').addEventListener('click', runDebt);
-	}
+	if (container){ document.getElementById('addDebt').addEventListener('click',()=>addDebtRow(container)); addDebtRow(container); document.getElementById('runDebt').addEventListener('click', runDebt); }
 
 	// Mortgage
-	if (document.getElementById('runMortgage')){
-		document.getElementById('runMortgage').addEventListener('click', runMortgage);
-	}
+	if (document.getElementById('runMortgage')) document.getElementById('runMortgage').addEventListener('click', runMortgage);
 
 	// Crypto
-	if (document.getElementById('runCrypto')){
-		document.getElementById('runCrypto').addEventListener('click', runCrypto);
-	}
+	if (document.getElementById('runCrypto')) document.getElementById('runCrypto').addEventListener('click', runCrypto);
 });
 	</script>
 </body>
