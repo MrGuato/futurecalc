@@ -53,7 +53,7 @@ header p{margin:0;color:var(--muted)}
 label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
 .row{display:flex;gap:10px}
 .row > *{flex:1}
-input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--inputBg);color:var(--ink);outline:none}
+input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--inputBg);color:var(--ink);outline:none}
 input[type="checkbox"]{width:auto;transform:translateY(2px)}
 .help{font-size:12px;color:var(--muted);margin-top:4px}
 .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#001428;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
@@ -87,553 +87,909 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 	font-size:14px;cursor:pointer;user-select:none;
 }
 #themeBtn:hover{box-shadow:0 0 0 3px var(--chip) inset}
+
+/* Segmented control + section visibility */
+.seg{
+	appearance:none;border:0;margin:0;background:transparent;color:var(--muted);
+	padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600
+}
+.seg.active{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line) inset}
+.calc-sec{display:none}
+.calc-sec.active{display:block}
 	</style>
 </head>
 <body>
 	<header>
 		<h1>FutureCalc</h1>
 		<p>Split your paycheck, build a 6-month emergency fund, and watch compounding work for you.</p>
-
-		<!-- Theme icon button (Auto → Light → Dark) -->
 		<button id="themeBtn" type="button" aria-label="Theme: Auto" title="Theme: Auto">A</button>
 	</header>
 
+	<div style="margin-top:10px;display:flex;justify-content:center">
+		<div id="nav" role="tablist" aria-label="Calculators" style="display:inline-flex;background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:4px">
+			<button class="seg active" role="tab" aria-selected="true" data-target="sec-paycheck">Paycheck</button>
+			<button class="seg" role="tab" aria-selected="false" data-target="sec-debt">Debt</button>
+			<button class="seg" role="tab" aria-selected="false" data-target="sec-mortgage">Mortgage</button>
+			<button class="seg" role="tab" aria-selected="false" data-target="sec-crypto">Crypto</button>
+		</div>
+	</div>
+
 	<div class="wrap">
 		<div class="grid">
-			<!-- Inputs -->
-			<section class="card" id="inputs">
-				<h2>1) Your Inputs</h2>
 
-				<label>Gross paycheck amount (before taxes)</label>
-				<input id="gross" type="number" min="0" step="0.01" placeholder="e.g., 2,000" />
+			<!-- Paycheck section -->
+			<section id="sec-paycheck" class="calc-sec active">
+				<!-- Inputs -->
+				<section class="card" id="inputs">
+					<h2>1) Your Inputs</h2>
 
-				<div class="row">
-					<div>
-						<label>Pay frequency</label>
-						<select id="frequency">
-							<option value="52">Weekly (52/yr)</option>
-							<option value="26" selected>Bi-weekly (26/yr)</option>
-							<option value="24">Semi-monthly (24/yr)</option>
-							<option value="12">Monthly (12/yr)</option>
-						</select>
-					</div>
-					<div>
-						<label>Projection length (years)</label>
-						<input id="years" type="number" min="1" max="60" value="30" />
-					</div>
-				</div>
+					<label>Gross paycheck amount (before taxes)</label>
+					<input id="gross" type="number" min="0" step="0.01" placeholder="e.g., 2,000" />
 
-				<div class="row">
-					<div>
-						<label>Investing — % of each paycheck</label>
-						<input id="investPct" type="number" min="0" max="100" step="0.1" value="15" />
-						<input id="investSlider" type="range" min="0" max="100" step="1" value="15" />
-						<div class="help">Long-term (e.g., index funds).</div>
-					</div>
-					<div>
-						<label>Savings — % of each paycheck</label>
-						<input id="savePct" type="number" min="0" max="100" step="0.1" value="10" />
-						<input id="saveSlider" type="range" min="0" max="100" step="1" value="10" />
-						<div class="help">Cash for emergencies.</div>
-					</div>
-				</div>
-
-				<div class="row">
-					<div>
-						<label>Expected annual return (investing)</label>
-						<input id="annualReturn" type="number" min="0" max="20" step="0.1" value="9" />
-					</div>
-					<div>
-						<label>Savings APY</label>
-						<input id="savingsApy" type="number" min="0" max="10" step="0.1" value="0.5" />
-					</div>
-				</div>
-
-				<div class="row">
-					<div>
-						<label>Your average monthly living expenses</label>
-						<input id="monthlyExpenses" type="number" min="0" step="1" placeholder="e.g., 2,500" />
-					</div>
-					<div>
-						<label>Emergency fund target</label>
-						<div style="display:flex;gap:8px;align-items:center"><span class="pill">6 × monthly expenses</span></div>
-					</div>
-				</div>
-
-				<div class="divider"></div>
-
-				<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-					<input id="redirect" type="checkbox" checked />
-					<label for="redirect">After EF is full, redirect the Savings % to Investing</label>
-				</div>
-
-				<div class="divider"></div>
-
-				<div style="display:flex;gap:8px;flex-wrap:wrap">
-					<button class="btn" id="run" type="button">Calculate</button>
-					<button class="btn secondary" id="reset" type="button">Reset</button>
-					<span class="tag" id="status">Ready</span>
-				</div>
-			</section>
-
-			<!-- Results -->
-			<section class="card">
-				<h2>2) Results & Insights</h2>
-
-				<div class="stats">
-					<div class="stat"><div class="k">Investing total (end)</div><div class="v" id="investTotal">$0</div></div>
-					<div class="stat"><div class="k">Savings balance (end)</div><div class="v" id="saveTotal">$0</div></div>
-					<div class="stat"><div class="k">Emergency fund goal</div><div class="v" id="efGoal">$0</div></div>
-					<div class="stat"><div class="k">Time to reach EF</div><div class="v" id="timeToEF">—</div></div>
-				</div>
-
-				<div class="ef-wrap">
-					<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-						<div><strong>Emergency Fund Progress</strong></div>
-						<div class="mini">
-							<div class="box"><div class="k">Current</div><div class="v" id="efNow">$0</div></div>
-							<div class="box"><div class="k">Goal</div><div class="v" id="efGoalMini">$0</div></div>
+					<div class="row">
+						<div>
+							<label>Pay frequency</label>
+							<select id="frequency">
+								<option value="52">Weekly (52/yr)</option>
+								<option value="26" selected>Bi-weekly (26/yr)</option>
+								<option value="24">Semi-monthly (24/yr)</option>
+								<option value="12">Monthly (12/yr)</option>
+							</select>
+						</div>
+						<div>
+							<label>Projection length (years)</label>
+							<input id="years" type="number" min="1" max="60" value="30" />
 						</div>
 					</div>
-					<div class="bar" aria-label="Emergency Fund progress"><span id="efBar"></span></div>
-				</div>
 
-				<div class="divider"></div>
+					<div class="row">
+						<div>
+							<label>Investing — % of each paycheck</label>
+							<input id="investPct" type="number" min="0" max="100" step="0.1" value="15" />
+							<input id="investSlider" type="range" min="0" max="100" step="1" value="15" />
+							<div class="help">Long-term (e.g., index funds).</div>
+						</div>
+						<div>
+							<label>Savings — % of each paycheck</label>
+							<input id="savePct" type="number" min="0" max="100" step="0.1" value="10" />
+							<input id="saveSlider" type="range" min="0" max="100" step="1" value="10" />
+							<div class="help">Cash for emergencies.</div>
+						</div>
+					</div>
 
-				<div class="mini">
-					<div class="box"><div class="k">Investing: Contributions</div><div class="v" id="invContrib">$0</div></div>
-					<div class="box"><div class="k">Investing: Growth</div><div class="v" id="invGrowth">$0</div></div>
-					<div class="box"><div class="k">Savings: Contributions</div><div class="v" id="savContrib">$0</div></div>
-					<div class="box"><div class="k">Savings: Interest</div><div class="v" id="savGrowth">$0</div></div>
-				</div>
+					<div class="row">
+						<div>
+							<label>Expected annual return (investing)</label>
+							<input id="annualReturn" type="number" min="0" max="20" step="0.1" value="9" />
+						</div>
+						<div>
+							<label>Savings APY</label>
+							<input id="savingsApy" type="number" min="0" max="10" step="0.1" value="0.5" />
+						</div>
+					</div>
 
-				<div class="divider"></div>
+					<div class="row">
+						<div>
+							<label>Your average monthly living expenses</label>
+							<input id="monthlyExpenses" type="number" min="0" step="1" placeholder="e.g., 2,500" />
+						</div>
+						<div>
+							<label>Emergency fund target</label>
+							<div style="display:flex;gap:8px;align-items:center"><span class="pill">6 × monthly expenses</span></div>
+						</div>
+					</div>
 
-				<div class="right">
-					<div class="pill">Order of Operations</div>
-					<div class="pill">Assumes consistent contributions & returns</div>
-				</div>
+					<div class="divider"></div>
 
-				<ol class="oplist" id="ops">
-					<li><strong>Build your emergency fund</strong> to <span id="efExplain">6 months of expenses</span>.</li>
-					<li><strong>Invest</strong> <span id="investExplain">15%</span> of each paycheck.</li>
-					<li><strong>After your emergency fund is full</strong>, <span id="redirExplain">redirect the Savings % to Investing</span>.</li>
-				</ol>
+					<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+						<input id="redirect" type="checkbox" checked />
+						<label for="redirect">After EF is full, redirect the Savings % to Investing</label>
+					</div>
 
-				<div class="divider"></div>
+					<div class="divider"></div>
 
-				<div class="chart-box">
-					<canvas id="chart"></canvas>
-				</div>
+					<div style="display:flex;gap:8px;flex-wrap:wrap">
+						<button class="btn" id="run" type="button">Calculate</button>
+						<button class="btn secondary" id="reset" type="button">Reset</button>
+						<span class="tag" id="status" role="status" aria-live="polite">Ready</span>
+					</div>
+				</section>
 
-				<div class="divider"></div>
+				<!-- Results -->
+				<section class="card">
+					<h2>2) Results & Insights</h2>
 
-				<div class="mini">
-					<div class="box"><div class="k">Milestone</div><div class="v" id="mileEF">EF: —</div></div>
-					<div class="box"><div class="k">$100k invested</div><div class="v" id="mile100k">—</div></div>
-					<div class="box"><div class="k">$250k invested</div><div class="v" id="mile250k">—</div></div>
-					<div class="box"><div class="k">$500k invested</div><div class="v" id="mile500k">—</div></div>
-				</div>
+					<div class="stats">
+						<div class="stat"><div class="k">Investing total (end)</div><div class="v" id="investTotal">$0</div></div>
+						<div class="stat"><div class="k">Savings balance (end)</div><div class="v" id="saveTotal">$0</div></div>
+						<div class="stat"><div class="k">Emergency fund goal</div><div class="v" id="efGoal">$0</div></div>
+						<div class="stat"><div class="k">Time to reach EF</div><div class="v" id="timeToEF">—</div></div>
+					</div>
 
-				<p class="footer">
-					<strong>What is "6 months of living expenses"?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal.
-				</p>
-				<p class="footer">
-					Educational tool only. Returns aren't guaranteed; personal situations vary.
-				</p>
+					<div class="ef-wrap">
+						<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+							<div><strong>Emergency Fund Progress</strong></div>
+							<div class="mini">
+								<div class="box"><div class="k">Current</div><div class="v" id="efNow">$0</div></div>
+								<div class="box"><div class="k">Goal</div><div class="v" id="efGoalMini">$0</div></div>
+							</div>
+						</div>
+						<div class="bar" aria-label="Emergency Fund progress"><span id="efBar"></span></div>
+					</div>
+
+					<div class="divider"></div>
+
+					<div class="mini">
+						<div class="box"><div class="k">Investing: Contributions</div><div class="v" id="invContrib">$0</div></div>
+						<div class="box"><div class="k">Investing: Growth</div><div class="v" id="invGrowth">$0</div></div>
+						<div class="box"><div class="k">Savings: Contributions</div><div class="v" id="savContrib">$0</div></div>
+						<div class="box"><div class="k">Savings: Interest</div><div class="v" id="savGrowth">$0</div></div>
+					</div>
+
+					<div class="divider"></div>
+
+					<div class="right">
+						<div class="pill">Order of Operations</div>
+						<div class="pill">Assumes consistent contributions & returns</div>
+					</div>
+
+					<ol class="oplist" id="ops">
+						<li><strong>Build your emergency fund</strong> to <span id="efExplain">6 months of expenses</span>.</li>
+						<li><strong>Invest</strong> <span id="investExplain">15%</span> of each paycheck.</li>
+						<li><strong>After your emergency fund is full</strong>, <span id="redirExplain">redirect the Savings % to Investing</span>.</li>
+					</ol>
+
+					<div class="divider"></div>
+
+					<div class="chart-box">
+						<canvas id="chart"></canvas>
+					</div>
+
+					<div class="divider"></div>
+
+					<div class="mini">
+						<div class="box"><div class="k">Milestone</div><div class="v" id="mileEF">EF: —</div></div>
+						<div class="box"><div class="k">$100k invested</div><div class="v" id="mile100k">—</div></div>
+						<div class="box"><div class="k">$250k invested</div><div class="v" id="mile250k">—</div></div>
+						<div class="box"><div class="k">$500k invested</div><div class="v" id="mile500k">—</div></div>
+					</div>
+
+					<p class="footer">
+						<strong>What is "6 months of living expenses"?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal.
+					</p>
+					<p class="footer">
+						Educational tool only. Returns aren't guaranteed; personal situations vary.
+					</p>
+				</section>
 			</section>
+
+			<!-- Debt section -->
+			<section id="sec-debt" class="calc-sec">
+				<section class="card">
+					<h2>Debt Payoff</h2>
+					<div class="help">Enter one or more debts. Strategy defaults to Avalanche.</div>
+
+					<div id="debts"></div>
+
+					<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+						<button type="button" class="btn secondary" id="addDebt">Add debt</button>
+						<select id="strategy" aria-label="Strategy">
+							<option value="avalanche" selected>Avalanche (highest APR first)</option>
+							<option value="snowball">Snowball (smallest balance first)</option>
+						</select>
+						<label style="display:inline-flex;align-items:center;gap:8px">
+							<span>Extra monthly</span>
+							<input id="extraPay" type="number" min="0" step="1" value="0" style="width:120px"/>
+						</label>
+						<button type="button" class="btn" id="runDebt">Calculate</button>
+						<button type="button" class="btn secondary" id="exportDebt">Export CSV</button>
+						<span class="tag" id="statusDebt" role="status" aria-live="polite">Ready</span>
+					</div>
+				</section>
+
+				<section class="card">
+					<h2>Summary</h2>
+					<div class="stats">
+						<div class="stat"><div class="k">Time to payoff</div><div class="v" id="debtTime">—</div></div>
+						<div class="stat"><div class="k">Total interest</div><div class="v" id="debtInterest">$0</div></div>
+						<div class="stat"><div class="k">Total paid</div><div class="v" id="debtTotal">$0</div></div>
+						<div class="stat"><div class="k">Strategy</div><div class="v" id="debtStrat">Avalanche</div></div>
+					</div>
+					<div class="divider"></div>
+					<div class="mini" id="debtMilestones"></div>
+				</section>
+			</section>
+
+			<!-- Mortgage section -->
+			<section id="sec-mortgage" class="calc-sec">
+				<section class="card">
+					<h2>Mortgage</h2>
+					<div class="row">
+						<div><label>Home price</label><input id="mPrice" type="number" min="0" step="1000" value="400000"/></div>
+						<div><label>Down payment</label><input id="mDown" type="number" min="0" step="1000" value="80000"/></div>
+					</div>
+					<div class="row">
+						<div><label>Rate (APR %)</label><input id="mRate" type="number" min="0" step="0.01" value="6.5"/></div>
+						<div><label>Term (years)</label><input id="mYears" type="number" min="1" max="40" value="30"/></div>
+					</div>
+					<div class="row">
+						<div><label>Extra monthly</label><input id="mExtra" type="number" min="0" step="1" value="0"/></div>
+						<div><label>Property tax + Insurance (monthly)</label><input id="mTI" type="number" min="0" step="1" value="0"/></div>
+					</div>
+					<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+						<button type="button" class="btn" id="runMortgage">Calculate</button>
+						<button type="button" class="btn secondary" id="exportMortgage">Export CSV</button>
+						<span class="tag" id="statusMortgage" role="status" aria-live="polite">Ready</span>
+					</div>
+				</section>
+
+				<section class="card">
+					<h2>Summary</h2>
+					<div class="stats">
+						<div class="stat"><div class="k">Principal</div><div class="v" id="mPrincipal">$0</div></div>
+						<div class="stat"><div class="k">Monthly P&I</div><div class="v" id="mPI">$0</div></div>
+						<div class="stat"><div class="k">Total interest</div><div class="v" id="mInterest">$0</div></div>
+						<div class="stat"><div class="k">Time to payoff</div><div class="v" id="mTime">—</div></div>
+					</div>
+					<div class="divider"></div>
+					<div class="mini" id="mNotes"></div>
+				</section>
+			</section>
+
+			<!-- Crypto section -->
+			<section id="sec-crypto" class="calc-sec">
+				<section class="card">
+					<h2>Crypto DCA</h2>
+					<div class="row">
+						<div><label>Contribution (per period)</label><input id="cAmt" type="number" min="0" step="1" value="200"/></div>
+						<div><label>Frequency</label>
+							<select id="cFreq">
+								<option value="12">Monthly</option>
+								<option value="26" selected>Bi-weekly</option>
+								<option value="52">Weekly</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div><label>Years</label><input id="cYears" type="number" min="1" max="30" value="5"/></div>
+						<div><label>Fee per trade (%)</label><input id="cFee" type="number" min="0" step="0.01" value="0.2"/></div>
+					</div>
+					<div class="help">Paste or simulate price series. If left blank, a log-normal path is simulated with annualized 60% volatility and 10% drift (illustrative).</div>
+					<label>Price series (CSV of prices per period, optional)</label>
+					<textarea id="cSeries" rows="4"></textarea>
+					<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+						<button type="button" class="btn" id="runCrypto">Calculate</button>
+						<button type="button" class="btn secondary" id="exportCrypto">Export CSV</button>
+						<span class="tag" id="statusCrypto" role="status" aria-live="polite">Ready</span>
+					</div>
+				</section>
+
+				<section class="card">
+					<h2>Summary</h2>
+					<div class="stats">
+						<div class="stat"><div class="k">Units accumulated</div><div class="v" id="cUnits">0</div></div>
+						<div class="stat"><div class="k">Average cost</div><div class="v" id="cAvgCost">$0</div></div>
+						<div class="stat"><div class="k">Ending value</div><div class="v" id="cEndValue">$0</div></div>
+						<div class="stat"><div class="k">Max drawdown</div><div class="v" id="cMdd">—</div></div>
+					</div>
+				</section>
+			</section>
+
 		</div>
 	</div>
 
 	<!-- Chart.js (CDN) -->
-	<script
-		src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"
-		integrity="sha256-AI3YdXzNQ+TiLHH0SRtG3/DB7P8t3Dm2hGq3bD16Q08="
-		crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 
 	<script>
-	// ============== Helpers ==============
-	const $ = (id)=>document.getElementById(id);
-	const setStatus = (msg)=>{ const s=$('status'); if(s) s.textContent=msg; };
-	const fmt = (n)=> (isFinite(n)? n:0).toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
-	const monthsWords = (p)=>{
-		if (p===Infinity) return 'Not reached';
-		const y=Math.floor(p/12), m=p%12;
-		if (y===0) return `${m} month${m!==1?'s':''}`;
-		if (m===0) return `${y} year${y!==1?'s':''}`;
-		return `${y}y ${m}m`;
-	};
+/* ========= Helpers ========= */
+const $ = (id)=>document.getElementById(id);
+const setStatus = (msg)=>{ const s=$('status'); if(s) s.textContent=msg; };
+const fmt = (n)=> (isFinite(n)? n:0).toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+const monthsWords = (p)=>{
+	if (p===Infinity) return 'Not reached';
+	const y=Math.floor(p/12), m=p%12;
+	if (y===0) return `${m} month${m!==1?'s':''}`;
+	if (m===0) return `${y} year${y!==1?'s':''}`;
+	return `${y}y ${m}m`;
+};
+const getVar=(name)=> {
+	try {
+		const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+		if (value) return value;
+	} catch(e) {}
+	return name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc';
+};
 
-	// Safer CSS var getter
-	const getVar=(name)=> {
-		try {
-			const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-			if (value) return value;
-		} catch(e) { console.warn('Error getting CSS variable:', name, e); }
-		return name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc';
-	};
+let chart = null;
+let DOM_READY = false;
 
-	// Chart variable - initialize as null
-	let chart = null;
-	let DOM_READY = false;
+/* ========= Theme handling ========= */
+const THEME_KEY = 'futurecalc_theme';
+const themeModes = ['auto','light','dark'];
+const themeIcons = { auto:'A', light:'☀️', dark:'🌙' };
+const themeLabels = { auto:'Theme: Auto', light:'Theme: Light', dark:'Theme: Dark' };
 
-	// ============== Theme handling (icon button cycles Auto → Light → Dark) ==============
-	const THEME_KEY = 'futurecalc_theme';
-	const themeModes = ['auto','light','dark'];
-	const themeIcons = { auto:'A', light:'☀️', dark:'🌙' };
-	const themeLabels = { auto:'Theme: Auto', light:'Theme: Light', dark:'Theme: Dark' };
+function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+function applyTheme(mode){
+	const root = document.documentElement;
+	root.setAttribute('data-theme', mode === 'auto' ? (systemPrefersDark() ? 'dark' : 'light') : mode);
+	try { localStorage.setItem(THEME_KEY, mode); } catch {}
+	const btn = $('themeBtn');
+	if (btn){
+		btn.textContent = themeIcons[mode];
+		btn.setAttribute('aria-label', themeLabels[mode]);
+		btn.title = themeLabels[mode];
+	}
+	// Re-render if possible
+	if (DOM_READY && $('chart') && window.Chart) {
+		try { const results = calculate(); if (results) render(results); } catch(e){}
+	}
+}
+function initTheme(){
+	let saved = 'auto';
+	try { saved = localStorage.getItem(THEME_KEY) || 'auto'; } catch {}
+	applyTheme(saved);
+	if (window.matchMedia) {
+		const mq = window.matchMedia('(prefers-color-scheme: dark)');
+		if (mq.addEventListener) {
+			mq.addEventListener('change', ()=>{ const current=(localStorage.getItem(THEME_KEY)||'auto'); if (current==='auto') applyTheme('auto'); });
+		} else if (mq.addListener) {
+			mq.addListener(()=>{ const current=(localStorage.getItem(THEME_KEY)||'auto'); if (current==='auto') applyTheme('auto'); });
+		}
+	}
+}
+function cycleTheme(){
+	const current = (localStorage.getItem(THEME_KEY) || 'auto');
+	const idx = themeModes.indexOf(current);
+	const next = themeModes[(idx+1)%themeModes.length];
+	applyTheme(next);
+}
 
-	function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+/* ========= Paycheck math ========= */
+function calculate(){
+	const gross=+($('gross')?.value||0);
+	const periodsPerYear=+($('frequency')?.value||26);
+	const years=+($('years')?.value||30);
+	const investPct=Math.min(100,Math.max(0,+($('investPct')?.value||0)))/100;
+	const savePct=Math.min(100,Math.max(0,+($('savePct')?.value||0)))/100;
+	const annualReturn=Math.max(0,+($('annualReturn')?.value||0))/100;
+	const savingsApy=Math.max(0,+($('savingsApy')?.value||0))/100;
+	const monthlyExpenses=+($('monthlyExpenses')?.value||0);
+	const redirect=$('redirect')?.checked ?? true;
 
-	function applyTheme(mode){
-		const root = document.documentElement;
-		root.setAttribute('data-theme', mode === 'auto' ? (systemPrefersDark() ? 'dark' : 'light') : mode);
-		try { localStorage.setItem(THEME_KEY, mode); } catch {}
-		const btn = $('themeBtn');
-		if (btn){
-			btn.textContent = themeIcons[mode];
-			btn.setAttribute('aria-label', themeLabels[mode]);
-			btn.title = themeLabels[mode];
+	setStatus('Calculating…');
+
+	if (!gross || gross <= 0) { setStatus('Enter a valid paycheck amount'); return null; }
+	if (!((investPct+savePct) > 0)) { setStatus('Enter investment or savings percentages'); return null; }
+	if (!years || years <= 0) { setStatus('Enter valid projection years'); return null; }
+
+	const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
+	const totalP = Math.round(years*periodsPerYear);
+	const rI = Math.pow(1+annualReturn,1/periodsPerYear)-1;
+	const rS = Math.pow(1+savingsApy,1/periodsPerYear)-1;
+
+	let inv=0, sav=0, efAt=Infinity;
+	let invContrib=0, invGrowth=0;
+	let savContrib=0, savGrowth=0;
+
+	const invP=[], savP=[];
+	const investMilestones = { '100000': Infinity, '250000': Infinity, '500000': Infinity };
+
+	for(let p=0;p<=totalP;p++){
+		invP.push(inv); savP.push(sav);
+		if(p===totalP) break;
+
+		let cI=investPct*gross, cS=savePct*gross;
+
+		// EF stop/redirect
+		if(efGoal>0 && sav>=efGoal-0.005){
+			if(efAt===Infinity) efAt=p;
+			cS=0; if(redirect) cI+=savePct*gross;
 		}
 
-		// Re-render if possible
-		if (DOM_READY && $('chart') && (window.Chart)) {
+		// Growth this period (before contributions)
+		const gI = inv * rI;
+		const gS = sav * rS;
+
+		// Update balances
+		inv = inv + gI + cI;
+		sav = (efGoal>0) ? Math.min(efGoal, sav + gS + cS) : sav + gS + cS;
+
+		// Sums
+		invContrib += cI;
+		invGrowth  += gI;
+
+		// realized savings interest (don't overcount if at cap)
+		const realizedS = (efGoal>0)
+			? Math.max(0, Math.min(efGoal, sav) - Math.min(efGoal, sav - gS - cS) - cS)
+			: gS;
+		savContrib += cS;
+		savGrowth  += realizedS;
+
+		// milestones
+		const after = inv;
+		for (const k of Object.keys(investMilestones)){
+			if (investMilestones[k]===Infinity && after >= +k) investMilestones[k]=p;
+		}
+	}
+
+	return {
+		inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years,
+		invContrib, invGrowth, savContrib, savGrowth, investMilestones
+	};
+}
+
+const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
+
+function render(res){
+	if(!res){ setStatus('No results to render'); return; }
+
+	setStatus('Rendering…');
+
+	try {
+		// Totals
+		$('investTotal').textContent=fmt(res.inv);
+		$('saveTotal').textContent=fmt(res.sav);
+		$('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
+		$('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
+
+		// EF progress
+		$('efNow').textContent=fmt(res.sav);
+		$('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
+		const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
+		$('efBar').style.width = pct + '%';
+
+		// Contributions vs growth
+		$('invContrib').textContent = fmt(res.invContrib);
+		$('invGrowth').textContent  = fmt(res.invGrowth);
+		$('savContrib').textContent = fmt(res.savContrib);
+		$('savGrowth').textContent  = fmt(res.savGrowth);
+
+		// copy text updates
+		$('efExplain').textContent='6 months of your essential monthly expenses';
+		$('investExplain').textContent=`${$('investPct').value}%`;
+		$('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
+
+		// Update milestones
+		const periodsToTime = (p) => p === Infinity ? '—' : monthsWords(Math.round(p*12/res.periodsPerYear));
+		$('mileEF').textContent = res.efAt === Infinity ? 'EF: Not reached' : `EF: ${periodsToTime(res.efAt)}`;
+		$('mile100k').textContent = periodsToTime(res.investMilestones['100000']);
+		$('mile250k').textContent = periodsToTime(res.investMilestones['250000']);
+		$('mile500k').textContent = periodsToTime(res.investMilestones['500000']);
+
+		// yearly downsample
+		const invY=[], savY=[];
+		for(let y=0;y<=res.years;y++){
+			const i=y*res.periodsPerYear;
+			invY.push(res.invP[i] || 0);
+			savY.push(res.savP[i] || 0);
+		}
+
+		// Chart
+		const canvas = $('chart');
+		if (!canvas){ setStatus('Canvas not found'); return; }
+		const ctx = canvas.getContext('2d');
+		if (!ctx){ setStatus('Canvas context failed'); return; }
+
+		// Destroy existing chart
+		if(chart) {
+			try { chart.destroy(); } catch(e) {}
+			chart = null;
+		}
+
+		if (window.Chart) {
 			try {
-				const results = calculate();
-				if (results) render(results);
-			} catch(e){
-				console.error('Theme change chart re-render failed:', e);
-			}
-		}
-	}
-
-	function initTheme(){
-		let saved = 'auto';
-		try { saved = localStorage.getItem(THEME_KEY) || 'auto'; } catch {}
-		applyTheme(saved);
-		if (window.matchMedia) {
-			const mq = window.matchMedia('(prefers-color-scheme: dark)');
-			// addEventListener for modern, fallback to addListener for older
-			if (mq.addEventListener) {
-				mq.addEventListener('change', ()=>{ const current = (localStorage.getItem(THEME_KEY) || 'auto'); if (current === 'auto') applyTheme('auto'); });
-			} else if (mq.addListener) {
-				mq.addListener(()=>{ const current = (localStorage.getItem(THEME_KEY) || 'auto'); if (current === 'auto') applyTheme('auto'); });
-			}
-		}
-	}
-
-	function cycleTheme(){
-		const current = (localStorage.getItem(THEME_KEY) || 'auto');
-		const idx = themeModes.indexOf(current);
-		const next = themeModes[(idx+1)%themeModes.length];
-		applyTheme(next);
-	}
-
-	// ============== Core math ==============
-	function calculate(){
-		const gross=+($('gross')?.value||0);
-		const periodsPerYear=+($('frequency')?.value||26);
-		const years=+($('years')?.value||30);
-		const investPct=Math.min(100,Math.max(0,+($('investPct')?.value||0)))/100;
-		const savePct=Math.min(100,Math.max(0,+($('savePct')?.value||0)))/100;
-		const annualReturn=Math.max(0,+($('annualReturn')?.value||0))/100;
-		const savingsApy=Math.max(0,+($('savingsApy')?.value||0))/100;
-		const monthlyExpenses=+($('monthlyExpenses')?.value||0);
-		const redirect=$('redirect')?.checked ?? true;
-
-		setStatus('Calculating…');
-
-		// Validation
-		if (!gross || gross <= 0) { setStatus('Enter a valid paycheck amount'); return null; }
-		if (!((investPct+savePct) > 0)) { setStatus('Enter investment or savings percentages'); return null; }
-		if (!years || years <= 0) { setStatus('Enter valid projection years'); return null; }
-
-		const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
-		const totalP = Math.round(years*periodsPerYear);
-		const rI = Math.pow(1+annualReturn,1/periodsPerYear)-1;
-		const rS = Math.pow(1+savingsApy,1/periodsPerYear)-1;
-
-		let inv=0, sav=0, efAt=Infinity;
-		let invContrib=0, invGrowth=0;
-		let savContrib=0, savGrowth=0;
-
-		const invP=[], savP=[];
-		const investMilestones = { '100000': Infinity, '250000': Infinity, '500000': Infinity };
-
-		for(let p=0;p<=totalP;p++){
-			invP.push(inv); savP.push(sav);
-			if(p===totalP) break;
-
-			let cI=investPct*gross, cS=savePct*gross;
-
-			// EF stop/redirect
-			if(efGoal>0 && sav>=efGoal-0.005){
-				if(efAt===Infinity) efAt=p;
-				cS=0; if(redirect) cI+=savePct*gross;
-			}
-
-			// Growth this period (before contributions)
-			const gI = inv * rI;
-			const gS = sav * rS;
-
-			// Update balances
-			inv = inv + gI + cI;
-			sav = (efGoal>0) ? Math.min(efGoal, sav + gS + cS) : sav + gS + cS;
-
-			// Sums
-			invContrib += cI;
-			invGrowth  += gI;
-
-			// realized savings interest (don't overcount if at cap)
-			const realizedS = (efGoal>0)
-				? Math.max(0, Math.min(efGoal, sav) - Math.min(efGoal, sav - gS - cS) - cS)
-				: gS;
-			savContrib += cS;
-			savGrowth  += realizedS;
-
-			// milestones
-			const after = inv;
-			for (const k of Object.keys(investMilestones)){
-				if (investMilestones[k]===Infinity && after >= +k) investMilestones[k]=p;
-			}
-		}
-
-		return {
-			inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years,
-			invContrib, invGrowth, savContrib, savGrowth, investMilestones
-		};
-	}
-
-	// ============== Render ==============
-	const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
-
-	function render(res){
-		if(!res){ setStatus('No results to render'); return; }
-
-		setStatus('Rendering…');
-
-		try {
-			// Totals
-			$('investTotal').textContent=fmt(res.inv);
-			$('saveTotal').textContent=fmt(res.sav);
-			$('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
-			$('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
-
-			// EF progress
-			$('efNow').textContent=fmt(res.sav);
-			$('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
-			const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
-			$('efBar').style.width = pct + '%';
-
-			// Contributions vs growth
-			$('invContrib').textContent = fmt(res.invContrib);
-			$('invGrowth').textContent  = fmt(res.invGrowth);
-			$('savContrib').textContent = fmt(res.savContrib);
-			$('savGrowth').textContent  = fmt(res.savGrowth);
-
-			// copy text updates
-			$('efExplain').textContent='6 months of your essential monthly expenses';
-			$('investExplain').textContent=`${$('investPct').value}%`;
-			$('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
-
-			// Update milestones
-			const periodsToTime = (p) => p === Infinity ? '—' : monthsWords(Math.round(p*12/res.periodsPerYear));
-			$('mileEF').textContent = res.efAt === Infinity ? 'EF: Not reached' : `EF: ${periodsToTime(res.efAt)}`;
-			$('mile100k').textContent = periodsToTime(res.investMilestones['100000']);
-			$('mile250k').textContent = periodsToTime(res.investMilestones['250000']);
-			$('mile500k').textContent = periodsToTime(res.investMilestones['500000']);
-
-			// yearly downsample
-			const invY=[], savY=[];
-			for(let y=0;y<=res.years;y++){
-				const i=y*res.periodsPerYear;
-				invY.push(res.invP[i] || 0);
-				savY.push(res.savP[i] || 0);
-			}
-
-			// Chart rendering — only if Chart.js present
-			const canvas = $('chart');
-			if (!canvas){
-				setStatus('Canvas not found');
-				console.error('Canvas #chart missing in DOM.');
-				return;
-			}
-			const ctx = canvas.getContext('2d');
-			if (!ctx){
-				setStatus('Canvas context failed');
-				console.error('getContext("2d") returned null');
-				return;
-			}
-
-			// Destroy existing chart
-			if(chart) {
-				try { chart.destroy(); } catch(e) { console.warn('Chart destroy failed:', e); }
-				chart = null;
-			}
-
-			if (window.Chart) {
-				try {
-					chart = new Chart(ctx, {
-						type:'line',
-						data:{
-							labels:yearLabels(res.years),
-							datasets:[
-								{
-									label:'Investing balance',
-									data:invY,
-									borderColor:getVar('--blue'),
-									backgroundColor:getVar('--blueFill'),
-									fill:true,
-									tension:.2
-								},
-								{
-									label:'Savings balance',
-									data:savY,
-									borderColor:getVar('--green'),
-									backgroundColor:getVar('--greenFill'),
-									fill:true,
-									tension:.2
-								}
-							]
+				chart = new Chart(ctx, {
+					type:'line',
+					data:{
+						labels:yearLabels(res.years),
+						datasets:[
+							{
+								label:'Investing balance',
+								data:invY,
+								borderColor:getVar('--blue'),
+								backgroundColor:getVar('--blueFill'),
+								fill:true,
+								tension:.2
+							},
+							{
+								label:'Savings balance',
+								data:savY,
+								borderColor:getVar('--green'),
+								backgroundColor:getVar('--greenFill'),
+								fill:true,
+								tension:.2
+							}
+						]
+					},
+					options:{
+						responsive:true,
+						maintainAspectRatio:false,
+						interaction:{mode:'index',intersect:false},
+						plugins:{
+							legend:{labels:{color:getVar('--muted')}},
+							tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}
 						},
-						options:{
-							responsive:true,
-							maintainAspectRatio:false,
-							interaction:{mode:'index',intersect:false},
-							plugins:{
-								legend:{labels:{color:getVar('--muted')}},
-								tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}
-							},
-							scales:{
-								x:{
-									ticks:{color:getVar('--muted')},
-									grid:{color:getVar('--gridSoft')}
-								},
-								y:{
-									ticks:{
-										color:getVar('--muted'),
-										callback:(v)=>'$'+Intl.NumberFormat().format(v)
-									},
-									grid:{color:getVar('--gridSoft')}
-								}
-							},
-							elements:{point:{radius:0}}
-						}
-					});
-					setStatus('Done');
-				} catch(e) {
-					console.error('Chart creation failed:', e);
-					setStatus('Chart creation failed');
-				}
-			} else {
-				// Graceful no-chart mode
-				setStatus('Done (no chart)');
-			}
-
-		} catch(e) {
-			console.error('Render failed:', e);
-			setStatus('Render failed');
-		}
-	}
-
-	// ============== DOM Ready ==============
-	document.addEventListener('DOMContentLoaded', ()=>{
-		DOM_READY = true;
-
-		// Theme setup
-		const btn = $('themeBtn');
-		if (btn) btn.addEventListener('click', cycleTheme);
-		initTheme();
-
-		// Input persistence
-		const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
-
-		function saveInputs(){
-			try {
-				const d={};
-				fields.forEach(f=>{
-					const el=$(f);
-					if (el) d[f]=el.type==='checkbox'?el.checked:el.value;
-				});
-				localStorage.setItem('futurecalc_inputs',JSON.stringify(d));
-			} catch(e) { console.warn('Failed to save inputs:', e); }
-		}
-
-		function loadInputs(){
-			try {
-				const raw=localStorage.getItem('futurecalc_inputs');
-				if(!raw) return;
-				const d=JSON.parse(raw);
-				fields.forEach(f=>{
-					if(d[f]!==undefined){
-						const el=$(f);
-						if (el) {
-							if (el.type==='checkbox') el.checked=d[f];
-							else el.value=d[f];
-						}
+						scales:{
+							x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
+							y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}
+						},
+						elements:{point:{radius:0}}
 					}
 				});
-			} catch(e) { console.warn('Failed to load inputs:', e); }
-		}
-
-		fields.forEach(f=>{
-			const el=$(f);
-			if(el){
-				el.addEventListener('input',saveInputs);
-				el.addEventListener('change',saveInputs);
+				setStatus('Done');
+			} catch(e) {
+				console.error('Chart creation failed:', e);
+				setStatus('Chart creation failed');
 			}
+		} else {
+			setStatus('Done (no chart)');
+		}
+	} catch(e) {
+		console.error('Render failed:', e);
+		setStatus('Render failed');
+	}
+}
+
+/* ========= Nav, utils, other calculators ========= */
+function initNav(){
+	const tabs = Array.from(document.querySelectorAll('#nav .seg'));
+	const secs = Array.from(document.querySelectorAll('.calc-sec'));
+	function activate(id){
+		secs.forEach(s=>s.classList.toggle('active', s.id===id));
+		tabs.forEach(t=>t.classList.toggle('active', t.dataset.target===id));
+	}
+	tabs.forEach(btn=>{
+		btn.addEventListener('click', ()=>{
+			const id = btn.dataset.target;
+			activate(id);
 		});
+	});
+	// default active already set on Paycheck
+}
+const FC = {
+	currency: 'USD',
+	fmt(n){ return (isFinite(n)?n:0).toLocaleString(undefined,{style:'currency',currency:this.currency,maximumFractionDigits:0}); },
+	monthsWords,
+	pmt(principal, rateMonthly, n){
+		if (rateMonthly===0) return principal / n;
+		const i = rateMonthly, v = Math.pow(1+i, n);
+		return principal * i * v / (v - 1);
+	},
+	toCSV(rows){
+		return rows.map(r => r.map(v => typeof v==='number' ? v : `"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
+	},
+	downloadCSV(filename, csv){
+		const blob = new Blob([csv], {type:'text/csv'});
+		const a = document.createElement('a');
+		a.href = URL.createObjectURL(blob);
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+	}
+};
 
-		loadInputs();
+/* Debt calculator */
+function addDebtRow(container){
+	const row = document.createElement('div');
+	row.className = 'mini';
+	row.style.marginTop = '8px';
+	row.innerHTML = `
+		<div class="box"><div class="k">Name</div><div class="v"><input type="text" data-k="name" placeholder="e.g., Card A"></div></div>
+		<div class="box"><div class="k">Balance</div><div class="v"><input type="number" min="0" step="1" data-k="bal" value="2000"></div></div>
+		<div class="box"><div class="k">APR %</div><div class="v"><input type="number" min="0" step="0.01" data-k="apr" value="22.9"></div></div>
+		<div class="box"><div class="k">Minimum</div><div class="v"><input type="number" min="0" step="1" data-k="min" value="50"></div></div>
+		<div class="box"><div class="k">Remove</div><div class="v"><button type="button" class="btn secondary" data-k="rm">X</button></div></div>
+	`;
+	container.appendChild(row);
+	row.querySelector('[data-k="rm"]').addEventListener('click', ()=> row.remove());
+}
+function readDebts(){
+	const list = [];
+	document.querySelectorAll('#debts .mini').forEach(row=>{
+		const q = k => row.querySelector(`[data-k="${k}"]`);
+		const name = q('name')?.value?.trim() || 'Debt';
+		const bal = +q('bal')?.value || 0;
+		const apr = (+q('apr')?.value || 0) / 100;
+		const min = +q('min')?.value || 0;
+		if (bal > 0 && (apr >= 0) && min >= 0) list.push({name, bal, apr, min});
+	});
+	return list;
+}
+function payoffSchedule(debts, extra, strategy){
+	let ds = debts.map(d=>({...d, bal:+d.bal}));
+	const rows = [['Month','Name','Payment','Interest','Principal','Balance']];
+	let month = 0;
+	let totalInterest = 0;
+	while (ds.some(d=>d.bal > 0) && month < 3600){
+		month++;
+		// Accrue interest
+		ds.forEach(d=>{
+			const i = d.apr/12;
+			const int = d.bal * i;
+			d.intAcc = (d.intAcc||0) + int;
+		});
+		// Budget = mins + extra
+		let budget = ds.reduce((s,d)=>s + Math.min(d.min, d.bal + (d.intAcc||0)), 0) + extra;
+		// Order
+		const order = [...ds].filter(d=>d.bal>0).sort((a,b)=>{
+			if (strategy==='snowball') return a.bal - b.bal;
+			return b.apr - a.apr; // avalanche
+		});
+		// Pay in order
+		order.forEach(d=>{
+			if (d.bal <= 0) return;
+			const iDue = d.intAcc||0;
+			const due = d.bal + iDue;
+			let pay = Math.min(d.min, due);
+			if (budget > 0){
+				const extraTake = Math.min(Math.max(0,budget - pay), due - pay);
+				if (extraTake > 0) pay += extraTake;
+			}
+			budget -= pay;
 
-		// Slider <-> input synchronization
-		function syncPair(numId, sliderId){
-			const num=$(numId), rng=$(sliderId);
-			if (!num || !rng) return;
-			num.addEventListener('input',()=>{rng.value=num.value;});
-			rng.addEventListener('input',()=>{num.value=rng.value;});
-		}
-		syncPair('investPct','investSlider');
-		syncPair('savePct','saveSlider');
+			const interestPortion = Math.min(iDue, pay);
+			const principalPortion = Math.max(0, pay - interestPortion);
+			d.intAcc = iDue - interestPortion;
+			d.bal = Math.max(0, d.bal - principalPortion);
 
-		// Button handlers
-		const runBtn=$('run'), resetBtn=$('reset');
-		if (runBtn) {
-			runBtn.addEventListener('click',()=>{
-				const results = calculate();
-				if (results) render(results);
+			totalInterest += interestPortion;
+			rows.push([month, d.name, pay, interestPortion, principalPortion, d.bal]);
+		});
+		if (order.every(d=>d.bal===0 || d.min===0) && extra===0) break;
+	}
+	const totalPaid = rows.slice(1).reduce((s,r)=>s + (+r[2]||0), 0);
+	return {rows, months:month, totalInterest, totalPaid};
+}
+function runDebt(){
+	const debts = readDebts();
+	const extra = +document.getElementById('extraPay').value || 0;
+	const strategy = document.getElementById('strategy').value;
+	const st = document.getElementById('statusDebt');
+	if (debts.length===0){ st.textContent='Add at least one debt'; return; }
+	st.textContent='Calculating…';
+	const {rows, months, totalInterest, totalPaid} = payoffSchedule(debts, extra, strategy);
+	document.getElementById('debtTime').textContent = FC.monthsWords(months);
+	document.getElementById('debtInterest').textContent = FC.fmt(totalInterest);
+	document.getElementById('debtTotal').textContent = FC.fmt(totalPaid);
+	document.getElementById('debtStrat').textContent = strategy==='snowball'?'Snowball':'Avalanche';
+	const box = document.getElementById('debtMilestones');
+	box.innerHTML = '';
+	debts.forEach(d=>{
+		const doneRow = rows.find(r => r[1]===d.name && r[5]===0);
+		const div = document.createElement('div');
+		div.className='box';
+		div.innerHTML = `<div class="k">${d.name} paid off</div><div class="v">${doneRow? 'Month '+doneRow[0] : '—'}</div>`;
+		box.appendChild(div);
+	});
+	document.getElementById('exportDebt').onclick = ()=> FC.downloadCSV('debt_schedule.csv', FC.toCSV(rows));
+	st.textContent='Done';
+}
+
+/* Mortgage calculator */
+function mortgageSchedule(P, rate, years, extra){
+	const i = rate/100/12;
+	const n = Math.round(years*12);
+	let M = FC.pmt(P, i, n);
+	let bal = P, month=0, totalInterest=0;
+	const rows = [['Month','Payment','Interest','Principal','Balance']];
+	while (bal > 0 && month < n+120){
+		month++;
+		const interest = bal * i;
+		let pay = Math.min(bal + interest, M + (extra||0));
+		const principal = Math.max(0, pay - interest);
+		bal = Math.max(0, bal - principal);
+		totalInterest += interest;
+		rows.push([month, pay, interest, principal, bal]);
+	}
+	const totalPaid = rows.slice(1).reduce((s,r)=>s + (+r[1]||0), 0);
+	return {rows, months: month, M, totalInterest, totalPaid};
+}
+function runMortgage(){
+	const price = +document.getElementById('mPrice').value||0;
+	const down  = +document.getElementById('mDown').value||0;
+	const rate  = +document.getElementById('mRate').value||0;
+	const years = +document.getElementById('mYears').value||30;
+	const extra = +document.getElementById('mExtra').value||0;
+	const ti    = +document.getElementById('mTI').value||0;
+	const st = document.getElementById('statusMortgage');
+	if (price<=0 || rate<0 || years<=0 || down<0){ st.textContent='Enter valid inputs'; return; }
+	const P = Math.max(0, price - down);
+	const {rows, months, M, totalInterest} = mortgageSchedule(P, rate, years, extra);
+	document.getElementById('mPrincipal').textContent = FC.fmt(P);
+	document.getElementById('mPI').textContent = FC.fmt(M + ti);
+	document.getElementById('mInterest').textContent = FC.fmt(totalInterest);
+	document.getElementById('mTime').textContent = FC.monthsWords(months);
+	const notes = document.getElementById('mNotes');
+	notes.innerHTML = '';
+	const pmiDiv = document.createElement('div');
+	pmiDiv.className='box';
+	let ltvCross = '—';
+	for (let r of rows.slice(1)){
+		const bal = r[4];
+		if (bal <= price*0.8){ ltvCross = 'Month '+r[0]; break; }
+	}
+	pmiDiv.innerHTML = `<div class="k">80% LTV reached</div><div class="v">${ltvCross}</div>`;
+	notes.appendChild(pmiDiv);
+	document.getElementById('exportMortgage').onclick = ()=> FC.downloadCSV('mortgage_schedule.csv', FC.toCSV(rows));
+	st.textContent='Done';
+}
+
+/* Crypto DCA */
+function parseSeries(text){
+	const vals = text.split(/[\s,]+/).map(v=>+v).filter(v=>isFinite(v) && v>0);
+	return vals.length ? vals : null;
+}
+function simulateSeries(n, driftA=0.10, volA=0.60, start=100){
+	const mu = driftA, sigma = volA;
+	const mu_p = mu / n, sig_p = sigma / Math.sqrt(n);
+	let p = start, arr=[p];
+	for (let k=1;k<n;k++){
+		// simple bounded pseudo-normal via sum of two uniforms
+		const z = Math.max(-4, Math.min(4, (Math.random()*2-1) + (Math.random()*2-1)));
+		p = p * Math.exp((mu_p - 0.5*sig_p*sig_p) + sig_p*z);
+		arr.push(Math.max(0.01, p));
+	}
+	return arr;
+}
+function dca(cAmt, freq, years, feePct, series){
+	const N = Math.round(freq*years);
+	const prices = series && series.length>=N ? series.slice(0,N)
+		: (series && series.length>0 ? [...series, ...Array(N-series.length).fill(series.at(-1))] : simulateSeries(N, 0.10, 0.60, 100));
+	let units=0, cost=0, fees=0, rows=[['Period','Price','Buy $','Fee $','Units','Cum Units','Cum Cost']];
+	for (let i=0;i<N;i++){
+		const price = prices[i];
+		const fee = cAmt * (feePct/100);
+		const buy = Math.max(0, cAmt - fee);
+		const u = buy / price;
+		units += u;
+		cost += buy;
+		fees += fee;
+		rows.push([i+1, price, buy, fee, u, units, cost+fees]);
+	}
+	const endValue = units * prices.at(-1);
+	// Max drawdown on portfolio value path
+	let peak = 0, mdd = 0, val=0;
+	for (let i=1;i<rows.length;i++){
+		const uCum = rows[i][5];
+		val = uCum * prices[i-1];
+		peak = Math.max(peak, val);
+		mdd = Math.max(mdd, peak>0 ? (peak - val)/peak : 0);
+	}
+	return {rows, units, avgCost: (cost+fees)/Math.max(1,units), endValue, mdd};
+}
+function runCrypto(){
+	const cAmt = +document.getElementById('cAmt').value||0;
+	const freq = +document.getElementById('cFreq').value||26;
+	const years= +document.getElementById('cYears').value||5;
+	const fee  = +document.getElementById('cFee').value||0;
+	const series = parseSeries(document.getElementById('cSeries').value);
+	const st = document.getElementById('statusCrypto');
+	if (cAmt<=0 || years<=0){ st.textContent='Enter valid inputs'; return; }
+	st.textContent = 'Calculating…';
+	const {rows, units, avgCost, endValue, mdd} = dca(cAmt, freq, years, fee, series);
+	document.getElementById('cUnits').textContent = units.toFixed(6);
+	document.getElementById('cAvgCost').textContent = FC.fmt(avgCost);
+	document.getElementById('cEndValue').textContent = FC.fmt(endValue);
+	document.getElementById('cMdd').textContent = (mdd*100).toFixed(1) + '%';
+	document.getElementById('exportCrypto').onclick = ()=> FC.downloadCSV('crypto_dca.csv', FC.toCSV(rows));
+	st.textContent = 'Done';
+}
+
+/* ========= DOM Ready ========= */
+document.addEventListener('DOMContentLoaded', ()=>{
+	DOM_READY = true;
+
+	// Theme
+	const btn = $('themeBtn');
+	if (btn) btn.addEventListener('click', cycleTheme);
+	initTheme();
+
+	// Nav
+	initNav();
+
+	// Input persistence (Paycheck)
+	const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
+	function saveInputs(){
+		try {
+			const d={};
+			fields.forEach(f=>{
+				const el=$(f);
+				if (el) d[f]=el.type==='checkbox'?el.checked:el.value;
 			});
-		}
-
-		if (resetBtn) {
-			resetBtn.addEventListener('click',()=>{
-				try {
-					localStorage.removeItem('futurecalc_inputs');
-					location.reload();
-				} catch(e) {
-					console.warn('Reset failed:', e);
-					// Fallback: just clear the form
-					fields.forEach(f => {
-						const el = $(f);
-						if (el) {
-							if (el.type === 'checkbox') el.checked = (f === 'redirect');
-							else el.value = '';
-						}
-					});
+			localStorage.setItem('futurecalc_inputs',JSON.stringify(d));
+		} catch(e) {}
+	}
+	function loadInputs(){
+		try {
+			const raw=localStorage.getItem('futurecalc_inputs');
+			if(!raw) return;
+			const d=JSON.parse(raw);
+			fields.forEach(f=>{
+				if(d[f]!==undefined){
+					const el=$(f);
+					if (el) {
+						if (el.type==='checkbox') el.checked=d[f];
+						else el.value=d[f];
+					}
 				}
 			});
-		}
-
-		// Auto-run if we have basic inputs
-		const grossEl = $('gross');
-		const expensesEl = $('monthlyExpenses');
-		if (grossEl?.value && expensesEl?.value) {
-			setTimeout(() => {
-				const results = calculate();
-				if (results) render(results);
-			}, 100);
+		} catch(e) {}
+	}
+	fields.forEach(f=>{
+		const el=$(f);
+		if(el){
+			el.addEventListener('input',saveInputs);
+			el.addEventListener('change',saveInputs);
 		}
 	});
+	loadInputs();
+
+	// Slider sync
+	function syncPair(numId, sliderId){
+		const num=$(numId), rng=$(sliderId);
+		if (!num || !rng) return;
+		num.addEventListener('input',()=>{rng.value=num.value;});
+		rng.addEventListener('input',()=>{num.value=rng.value;});
+	}
+	syncPair('investPct','investSlider');
+	syncPair('savePct','saveSlider');
+
+	// Paycheck buttons
+	const runBtn=$('run'), resetBtn=$('reset');
+	if (runBtn) {
+		runBtn.addEventListener('click',()=>{
+			const results = calculate();
+			if (results) render(results);
+		});
+	}
+	if (resetBtn) {
+		resetBtn.addEventListener('click',()=>{
+			try {
+				localStorage.removeItem('futurecalc_inputs');
+				location.reload();
+			} catch(e) {
+				fields.forEach(f => {
+					const el = $(f);
+					if (el) {
+						if (el.type === 'checkbox') el.checked = (f === 'redirect');
+						else el.value = '';
+					}
+				});
+			}
+		});
+	}
+
+	// Auto-run if basic inputs exist
+	const grossEl = $('gross');
+	const expensesEl = $('monthlyExpenses');
+	if (grossEl?.value && expensesEl?.value) {
+		setTimeout(() => {
+			const results = calculate();
+			if (results) render(results);
+		}, 100);
+	}
+
+	// Debt
+	const container = document.getElementById('debts');
+	if (container){
+		document.getElementById('addDebt').addEventListener('click', () => addDebtRow(container));
+		addDebtRow(container);
+		document.getElementById('runDebt').addEventListener('click', runDebt);
+	}
+
+	// Mortgage
+	if (document.getElementById('runMortgage')){
+		document.getElementById('runMortgage').addEventListener('click', runMortgage);
+	}
+
+	// Crypto
+	if (document.getElementById('runCrypto')){
+		document.getElementById('runCrypto').addEventListener('click', runCrypto);
+	}
+});
 	</script>
 </body>
 </html>
