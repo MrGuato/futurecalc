@@ -41,7 +41,16 @@ header{padding:28px 18px 8px;text-align:center;position:relative}
 header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
 header p{margin:0;color:var(--muted)}
 
-.wrap{max-width:100%;margin:0 auto;padding:clamp(12px,3vw,28px)}
+/* Slightly narrower than full width, percentage based */
+.wrap{
+	max-width: clamp(960px, 92%, 1280px);
+	margin: 0 auto;
+	padding: clamp(12px, 3vw, 28px);
+}
+@media (min-width: 1600px){
+	.wrap{ max-width: clamp(1040px, 88%, 1400px); }
+}
+
 .grid{display:grid;gap:16px;grid-template-columns:1fr}
 /* Optional two-column on very wide screens:
 @media (min-width:1400px){.grid{grid-template-columns:1fr 1fr}}
@@ -58,7 +67,7 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#001428;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
 .btn.secondary{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
 
-/* Stats across full width */
+/* Stats full width */
 .stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:8px}
 .stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
 .stat .k{font-size:12px;color:var(--muted)}
@@ -278,7 +287,7 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 					<div class="stats">
 						<div class="stat"><div class="k">Time to payoff</div><div class="v" id="debtTime">—</div></div>
 						<div class="stat"><div class="k">Total interest</div><div class="v" id="debtInterest">$0</div></div>
-						<div class="stat"><div class="k">Total paid</div><div class="v" id="debtTotal">$0</div></div>
+						<div class="stat"><div class="k">Total paid</div><div class="v" id="debtTotal">—</div></div>
 						<div class="stat"><div class="k">Strategy</div><div class="v" id="debtStrat">Avalanche</div></div>
 					</div>
 					<div class="divider"></div>
@@ -608,7 +617,7 @@ function readDebts(){
 }
 function payoffSchedule(debts, extra, strategy){
 	let ds = debts.map(d=>({...d, bal:+d.bal}));
-	const rows = [['Month','Name','Payment','Interest','Principal','Balance','TotalBalance']];
+	const rows = [['Month','TotalBalance']];
 	let month=0,totalInterest=0;
 	while (ds.some(d=>d.bal>0) && month<3600){
 		month++;
@@ -629,16 +638,14 @@ function payoffSchedule(debts, extra, strategy){
 			totalInterest+=iPort;
 		});
 		const totBal = ds.reduce((s,d)=>s+d.bal,0);
-		// Push one row per month (aggregate) for chart; we still export detailed rows per debt if needed
-		rows.push([month,'—',0,0,0,totBal,totBal]);
+		rows.push([month,totBal]);
 		if (order.every(d=>d.bal===0 || d.min===0) && extra===0) break;
 	}
-	const totalPaid = ds.reduce((s)=>s,0); // not used in chart line; kept for API symmetry
-	return {rows, months:month, totalInterest, totalPaid};
+	return {rows, months:month, totalInterest};
 }
 function renderDebtChart(rows){
 	const labels = rows.slice(1).map(r=>`M${r[0]}`);
-	const balance = rows.slice(1).map(r=>r[6]);
+	const balance = rows.slice(1).map(r=>r[1]);
 	const cv = document.getElementById('debtChart'); if(!cv) return;
 	const ctx = cv.getContext('2d'); if(!ctx) return;
 	if (debtChart){ try{debtChart.destroy();}catch(e){} debtChart=null; }
@@ -663,11 +670,9 @@ function runDebt(){
 	const {rows, months, totalInterest} = payoffSchedule(debts, extra, strategy);
 	document.getElementById('debtTime').textContent = FC.monthsWords(months);
 	document.getElementById('debtInterest').textContent = FC.fmt(totalInterest);
-	// Total paid (approx) = sum of monthly change + interest; omit for brevity; could compute from detailed schedule
 	document.getElementById('debtTotal').textContent = '—';
 	document.getElementById('debtStrat').textContent = strategy==='snowball'?'Snowball':'Avalanche';
 	const box = document.getElementById('debtMilestones'); box.innerHTML='';
-	// Simple milestone: final payoff month
 	const div=document.createElement('div'); div.className='box';
 	div.innerHTML = `<div class="k">All debts paid</div><div class="v">${months? 'Month '+months : '—'}</div>`;
 	box.appendChild(div);
@@ -682,7 +687,7 @@ function mortgageSchedule(P, rate, years, extra){
 	const n = Math.round(years*12);
 	let M = FC.pmt(P, i, n);
 	let bal = P, month=0, totalInterest=0;
-	const rows = [['Month','Payment','Interest','Principal','Balance']];
+	const rows = [['Month','Balance']];
 	while (bal > 0 && month < n+120){
 		month++;
 		const interest = bal * i;
@@ -690,14 +695,13 @@ function mortgageSchedule(P, rate, years, extra){
 		const principal = Math.max(0, pay - interest);
 		bal = Math.max(0, bal - principal);
 		totalInterest += interest;
-		rows.push([month, pay, interest, principal, bal]);
+		rows.push([month, bal]);
 	}
-	const totalPaid = rows.slice(1).reduce((s,r)=>s + (+r[1]||0), 0);
-	return {rows, months: month, M, totalInterest, totalPaid};
+	return {rows, months: month, M, totalInterest};
 }
 function renderMortgageChart(rows){
 	const labels = rows.slice(1).map(r=>`M${r[0]}`);
-	const bal = rows.slice(1).map(r=>r[4]);
+	const bal = rows.slice(1).map(r=>r[1]);
 	const cv = document.getElementById('mortgageChart'); if(!cv) return;
 	const ctx = cv.getContext('2d'); if(!ctx) return;
 	if (mortgageChart){ try{mortgageChart.destroy();}catch(e){} mortgageChart=null; }
@@ -730,10 +734,10 @@ function runMortgage(){
 	const notes = document.getElementById('mNotes'); notes.innerHTML='';
 	const pmiDiv = document.createElement('div'); pmiDiv.className='box';
 	let ltvCross = '—';
-	for (let r of rows.slice(1)){ const bal = r[4]; if (bal <= price*0.8){ ltvCross = 'Month '+r[0]; break; } }
+	for (let r of rows.slice(1)){ const bal = r[1]; if (bal <= price*0.8){ ltvCross = 'Month '+r[0]; break; } }
 	pmiDiv.innerHTML = `<div class="k">80% LTV reached</div><div class="v">${ltvCross}</div>`;
 	notes.appendChild(pmiDiv);
-	document.getElementById('exportMortgage').onclick = ()=> FC.downloadCSV('mortgage_schedule.csv', FC.toCSV(rows));
+	document.getElementById('exportMortgage').onclick = ()=> FC.downloadCSV('mortgage_balance.csv', FC.toCSV(rows));
 	renderMortgageChart(rows);
 	st.textContent='Done';
 }
@@ -760,16 +764,16 @@ function dca(cAmt, freq, years, feePct, series){
 		: (series && series.length>0 ? [...series, ...Array(N-series.length).fill(series.at(-1))] : simulateSeries(N, 0.10, 0.60, 100));
 	let units=0, cost=0, fees=0, rows=[['Period','Price','Buy $','Fee $','Units','Cum Units','Cum Cost','Portfolio $','Contrib $']];
 	for (let i=0;i<N;i++){
-		const price = prices[i];
-		const fee = cAmt * (feePct/100);
-		const buy = Math.max(0, cAmt - fee);
-		const u = buy / price;
-		units += u;
-		cost += buy;
-		fees += fee;
-		const portfolio = units * price;
-		const contributed = cost + fees;
-		rows.push([i+1, price, buy, fee, u, units, contributed, portfolio, contributed]);
+	 const price = prices[i];
+	 const fee = cAmt * (feePct/100);
+	 const buy = Math.max(0, cAmt - fee);
+	 const u = buy / price;
+	 units += u;
+	 cost += buy;
+	 fees += fee;
+	 const portfolio = units * price;
+	 const contributed = cost + fees;
+	 rows.push([i+1, price, buy, fee, u, units, contributed, portfolio, contributed]);
 	}
 	const endValue = rows.at(-1)[7];
 	const mdd = (()=>{ let peak=0, m=0; for (let i=1;i<rows.length;i++){ const v=rows[i][7]; peak=Math.max(peak,v); m=Math.max(m, peak? (peak-v)/peak:0);} return m; })();
@@ -807,13 +811,12 @@ function runCrypto(){
 	if (cAmt<=0 || years<=0){ st.textContent='Enter valid inputs'; return; }
 	st.textContent = 'Calculating…';
 	const {rows, endValue, mdd} = dca(cAmt, freq, years, fee, series);
-	// Summaries from final row
 	const last = rows.at(-1);
 	const units = last[5];
 	const avgCost = last[6]/Math.max(1, units);
 	document.getElementById('cUnits').textContent = units.toFixed(6);
-	document.getElementById('cAvgCost').textContent = FC.fmt(avgCost);
-	document.getElementById('cEndValue').textContent = FC.fmt(endValue);
+	document.getElementById('cAvgCost').textContent = fmt(avgCost);
+	document.getElementById('cEndValue').textContent = fmt(endValue);
 	document.getElementById('cMdd').textContent = (mdd*100).toFixed(1) + '%';
 	document.getElementById('exportCrypto').onclick = ()=> FC.downloadCSV('crypto_dca.csv', FC.toCSV(rows));
 	renderCryptoChart(rows);
