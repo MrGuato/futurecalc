@@ -1,678 +1,639 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>FutureCalc — Paycheck to Freedom</title>
-<meta name="description" content="FutureCalc helps professionals and millennials split each paycheck, build a 6-month emergency fund, and see long-term compounding." />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>FutureCalc — Paycheck to Freedom</title>
+	<meta name="description" content="FutureCalc helps professionals and millennials split each paycheck, build a 6-month emergency fund, and see long-term compounding." />
 
-<!-- Custom favicon/logo — replace href with your own path -->
-<link rel="icon" type="image/png" href="assets/favicon.png" />
+	<!-- Custom favicon/logo — replace href with your own path -->
+	<link rel="icon" type="image/png" href="assets/favicon.png" />
 
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<style>
-  :root{
-    /* Light (default) */
-    --bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
-    --accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
-    --blue:#2f6cf6; --blueFill:rgba(47,108,246,.14);
-    --green:#16a34a; --greenFill:rgba(22,163,74,.14);
-    --ok:#58d38a; --attn:#ff8a8a;
-    --inputBg:#ffffff; --surfaceLow:#f4f6fb; --gridSoft:rgba(0,0,0,0.06);
-  }
-  :root[data-theme="light"]{
-    --bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
-    --accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
-    --blue:#2f6cf6; --blueFill:rgba(47,108,246,.14);
-    --green:#16a34a; --greenFill:rgba(22,163,74,.14);
-    --ok:#58d38a; --attn:#ff8a8a;
-    --inputBg:#ffffff; --surfaceLow:#f4f6fb; --gridSoft:rgba(0,0,0,0.06);
-  }
-  :root[data-theme="dark"]{
-    --bg:#0b0f14; --card:#101722; --ink:#e7eef8; --muted:#9fb2cc;
-    --accent:#6ea8ff; --accent2:#58d38a; --line:#1b2432; --chip:#0f1622;
-    --blue:#4da3ff; --blueFill:rgba(77,163,255,.15);
-    --green:#49d17d; --greenFill:rgba(73,209,125,.15);
-    --ok:#58d38a; --attn:#ff8a8a;
-    --inputBg:#0e141d; --surfaceLow:#0e141d; --gridSoft:rgba(255,255,255,0.08);
-  }
+	<!-- Performance hint for CDN -->
+	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
-  *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
-  header{padding:28px 18px 8px;text-align:center;position:relative}
-  header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
-  header p{margin:0;color:var(--muted)}
+	<style>
+:root{
+	/* Light (default) */
+	--bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
+	--accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
+	--blue:#2f6cf6; --blueFill:rgba(47,108,246,.14);
+	--green:#16a34a; --greenFill:rgba(22,163,74,.14);
+	--ok:#58d38a; --attn:#ff8a8a;
+	--inputBg:#ffffff; --surfaceLow:#f4f6fb; --gridSoft:rgba(0,0,0,0.06);
+}
+:root[data-theme="light"]{
+	--bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
+	--accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
+	--blue:#2f6cf6; --blueFill:rgba(47,108,246,.14);
+	--green:#16a34a; --greenFill:rgba(22,163,74,.14);
+	--ok:#58d38a; --attn:#ff8a8a;
+	--inputBg:#ffffff; --surfaceLow:#f4f6fb; --gridSoft:rgba(0,0,0,0.06);
+}
+:root[data-theme="dark"]{
+	--bg:#0b0f14; --card:#101722; --ink:#e7eef8; --muted:#9fb2cc;
+	--accent:#6ea8ff; --accent2:#58d38a; --line:#1b2432; --chip:#0f1622;
+	--blue:#4da3ff; --blueFill:rgba(77,163,255,.15);
+	--green:#49d17d; --greenFill:rgba(73,209,125,.15);
+	--ok:#58d38a; --attn:#ff8a8a;
+	--inputBg:#0e141d; --surfaceLow:#0e141d; --gridSoft:rgba(255,255,255,0.08);
+}
 
-  .wrap{max-width:1100px;margin:0 auto;padding:18px}
-  .grid{display:grid;gap:16px;grid-template-columns:1fr}
-  @media(min-width:960px){.grid{grid-template-columns:380px 1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
-  .card h2{margin:0 0 12px;font-size:18px}
-  label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
-  .row{display:flex;gap:10px}.row>*{flex:1}
-  input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--inputBg);color:var(--ink);outline:none}
-  input[type="checkbox"]{width:auto;transform:translateY(2px)}
-  .help{font-size:12px;color:var(--muted);margin-top:4px}
-  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#001428;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
-  .btn.secondary{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
-  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
-  @media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
-  .stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
-  .stat .k{font-size:12px;color:var(--muted)}
-  .stat .v{font-size:18px;margin-top:4px}
-  .right{display:flex;justify-content:space-between;flex-wrap:wrap}
-  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px;color:var(--muted)}
-  .divider{height:1px;background:var(--line);margin:14px 0}
-  .footer{color:var(--muted);font-size:12px;margin-top:10px}
-  .oplist{margin:10px 0 0;padding-left:18px}.oplist li{margin:6px 0}
-  .tag{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-  .chart-box{position:relative;height:200px}
-  .ef-wrap{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
-  .bar{height:10px;background:var(--surfaceLow);border:1px solid var(--line);border-radius:999px;overflow:hidden}
-  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .4s ease}
-  .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
-  .mini .box{background:var(--surfaceLow);border:1px solid var(--line);border-radius:10px;padding:10px}
-  .mini .box .k{font-size:11px;color:var(--muted)}
-  .mini .box .v{font-size:14px;margin-top:2px}
-  .tooltip{cursor:help;border-bottom:1px dotted var(--muted)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
+header{padding:28px 18px 8px;text-align:center;position:relative}
+header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
+header p{margin:0;color:var(--muted)}
 
-  /* Tiny theme icon button */
-  #themeBtn{
-    position:absolute;top:16px;right:16px;
-    width:34px;height:28px;display:inline-flex;align-items:center;justify-content:center;
-    border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);
-    font-size:14px;cursor:pointer;user-select:none;
-  }
-  #themeBtn:hover{box-shadow:0 0 0 3px var(--chip) inset}
-</style>
+.wrap{max-width:1100px;margin:0 auto;padding:18px}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:960px){.grid{grid-template-columns:380px 1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{margin:0 0 12px;font-size:18px}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
+.row{display:flex;gap:10px}
+.row > *{flex:1}
+input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--inputBg);color:var(--ink);outline:none}
+input[type="checkbox"]{width:auto;transform:translateY(2px)}
+.help{font-size:12px;color:var(--muted);margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#001428;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
+.btn.secondary{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+@media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat .v{font-size:18px;margin-top:4px}
+.right{display:flex;justify-content:space-between;flex-wrap:wrap}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+.divider{height:1px;background:var(--line);margin:14px 0}
+.footer{color:var(--muted);font-size:12px;margin-top:10px}
+.oplist{margin:10px 0 0;padding-left:18px}.oplist li{margin:6px 0}
+.tag{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.chart-box{position:relative;height:200px}
+.ef-wrap{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
+.bar{height:10px;background:var(--surfaceLow);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.bar > span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .4s ease}
+.mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
+.mini .box{background:var(--surfaceLow);border:1px solid var(--line);border-radius:10px;padding:10px}
+.mini .box .k{font-size:11px;color:var(--muted)}
+.mini .box .v{font-size:14px;margin-top:2px}
+.tooltip{cursor:help;border-bottom:1px dotted var(--muted)}
+
+/* Tiny theme icon button */
+#themeBtn{
+	position:absolute;top:16px;right:16px;
+	width:34px;height:28px;display:inline-flex;align-items:center;justify-content:center;
+	border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);
+	font-size:14px;cursor:pointer;user-select:none;
+}
+#themeBtn:hover{box-shadow:0 0 0 3px var(--chip) inset}
+	</style>
 </head>
 <body>
-<header>
-  <h1>FutureCalc</h1>
-  <p>Split your paycheck, build a 6-month emergency fund, and watch compounding work for you.</p>
+	<header>
+		<h1>FutureCalc</h1>
+		<p>Split your paycheck, build a 6-month emergency fund, and watch compounding work for you.</p>
 
-  <!-- Theme icon button (Auto → Light → Dark) -->
-  <button id="themeBtn" type="button" aria-label="Theme: Auto" title="Theme: Auto">A</button>
-</header>
+		<!-- Theme icon button (Auto → Light → Dark) -->
+		<button id="themeBtn" type="button" aria-label="Theme: Auto" title="Theme: Auto">A</button>
+	</header>
 
-<div class="wrap">
-  <div class="grid">
-    <!-- Inputs -->
-    <section class="card" id="inputs">
-      <h2>1) Your Inputs</h2>
+	<div class="wrap">
+		<div class="grid">
+			<!-- Inputs -->
+			<section class="card" id="inputs">
+				<h2>1) Your Inputs</h2>
 
-      <label>Gross paycheck amount (before taxes)</label>
-      <input id="gross" type="number" min="0" step="0.01" placeholder="e.g., 2,000" />
+				<label>Gross paycheck amount (before taxes)</label>
+				<input id="gross" type="number" min="0" step="0.01" placeholder="e.g., 2,000" />
 
-      <div class="row">
-        <div>
-          <label>Pay frequency</label>
-          <select id="frequency">
-            <option value="52">Weekly (52/yr)</option>
-            <option value="26" selected>Bi-weekly (26/yr)</option>
-            <option value="24">Semi-monthly (24/yr)</option>
-            <option value="12">Monthly (12/yr)</option>
-          </select>
-        </div>
-        <div>
-          <label>Projection length (years)</label>
-          <input id="years" type="number" min="1" max="60" value="30" />
-        </div>
-      </div>
+				<div class="row">
+					<div>
+						<label>Pay frequency</label>
+						<select id="frequency">
+							<option value="52">Weekly (52/yr)</option>
+							<option value="26" selected>Bi-weekly (26/yr)</option>
+							<option value="24">Semi-monthly (24/yr)</option>
+							<option value="12">Monthly (12/yr)</option>
+						</select>
+					</div>
+					<div>
+						<label>Projection length (years)</label>
+						<input id="years" type="number" min="1" max="60" value="30" />
+					</div>
+				</div>
 
-      <div class="row">
-        <div>
-          <label>Investing — % of each paycheck</label>
-          <input id="investPct" type="number" min="0" max="100" step="0.1" value="15" />
-          <input id="investSlider" type="range" min="0" max="100" step="1" value="15" />
-          <div class="help">Long-term (e.g., index funds).</div>
-        </div>
-        <div>
-          <label>Savings — % of each paycheck</label>
-          <input id="savePct" type="number" min="0" max="100" step="0.1" value="10" />
-          <input id="saveSlider" type="range" min="0" max="100" step="1" value="10" />
-          <div class="help">Cash for emergencies.</div>
-        </div>
-      </div>
+				<div class="row">
+					<div>
+						<label>Investing — % of each paycheck</label>
+						<input id="investPct" type="number" min="0" max="100" step="0.1" value="15" />
+						<input id="investSlider" type="range" min="0" max="100" step="1" value="15" />
+						<div class="help">Long-term (e.g., index funds).</div>
+					</div>
+					<div>
+						<label>Savings — % of each paycheck</label>
+						<input id="savePct" type="number" min="0" max="100" step="0.1" value="10" />
+						<input id="saveSlider" type="range" min="0" max="100" step="1" value="10" />
+						<div class="help">Cash for emergencies.</div>
+					</div>
+				</div>
 
-      <div class="row">
-        <div>
-          <label>Expected annual return (investing)</label>
-          <input id="annualReturn" type="number" min="0" max="20" step="0.1" value="9" />
-        </div>
-        <div>
-          <label>Savings APY</label>
-          <input id="savingsApy" type="number" min="0" max="10" step="0.1" value="0.5" />
-        </div>
-      </div>
+				<div class="row">
+					<div>
+						<label>Expected annual return (investing)</label>
+						<input id="annualReturn" type="number" min="0" max="20" step="0.1" value="9" />
+					</div>
+					<div>
+						<label>Savings APY</label>
+						<input id="savingsApy" type="number" min="0" max="10" step="0.1" value="0.5" />
+					</div>
+				</div>
 
-      <div class="row">
-        <div>
-          <label>Your average monthly living expenses</label>
-          <input id="monthlyExpenses" type="number" min="0" step="1" placeholder="e.g., 2,500" />
-        </div>
-        <div>
-          <label>Emergency fund target</label>
-          <div style="display:flex;gap:8px;align-items:center"><span class="pill">6 × monthly expenses</span></div>
-        </div>
-      </div>
+				<div class="row">
+					<div>
+						<label>Your average monthly living expenses</label>
+						<input id="monthlyExpenses" type="number" min="0" step="1" placeholder="e.g., 2,500" />
+					</div>
+					<div>
+						<label>Emergency fund target</label>
+						<div style="display:flex;gap:8px;align-items:center"><span class="pill">6 × monthly expenses</span></div>
+					</div>
+				</div>
 
-      <div class="divider"></div>
+				<div class="divider"></div>
 
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <input id="redirect" type="checkbox" checked />
-        <label for="redirect">After EF is full, redirect the Savings % to Investing</label>
-      </div>
+				<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+					<input id="redirect" type="checkbox" checked />
+					<label for="redirect">After EF is full, redirect the Savings % to Investing</label>
+				</div>
 
-      <div class="divider"></div>
+				<div class="divider"></div>
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" id="run">Calculate</button>
-        <button class="btn secondary" id="reset">Reset</button>
-        <span class="tag" id="status">Ready</span>
-      </div>
-    </section>
+				<div style="display:flex;gap:8px;flex-wrap:wrap">
+					<button class="btn" id="run" type="button">Calculate</button>
+					<button class="btn secondary" id="reset" type="button">Reset</button>
+					<span class="tag" id="status">Ready</span>
+				</div>
+			</section>
 
-    <!-- Results -->
-    <section class="card">
-      <h2>2) Results & Insights</h2>
+			<!-- Results -->
+			<section class="card">
+				<h2>2) Results & Insights</h2>
 
-      <div class="stats">
-        <div class="stat"><div class="k">Investing total (end)</div><div class="v" id="investTotal">$0</div></div>
-        <div class="stat"><div class="k">Savings balance (end)</div><div class="v" id="saveTotal">$0</div></div>
-        <div class="stat"><div class="k">Emergency fund goal</div><div class="v" id="efGoal">$0</div></div>
-        <div class="stat"><div class="k">Time to reach EF</div><div class="v" id="timeToEF">—</div></div>
-      </div>
+				<div class="stats">
+					<div class="stat"><div class="k">Investing total (end)</div><div class="v" id="investTotal">$0</div></div>
+					<div class="stat"><div class="k">Savings balance (end)</div><div class="v" id="saveTotal">$0</div></div>
+					<div class="stat"><div class="k">Emergency fund goal</div><div class="v" id="efGoal">$0</div></div>
+					<div class="stat"><div class="k">Time to reach EF</div><div class="v" id="timeToEF">—</div></div>
+				</div>
 
-      <div class="ef-wrap">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <div><strong>Emergency Fund Progress</strong></div>
-          <div class="mini">
-            <div class="box"><div class="k">Current</div><div class="v" id="efNow">$0</div></div>
-            <div class="box"><div class="k">Goal</div><div class="v" id="efGoalMini">$0</div></div>
-          </div>
-        </div>
-        <div class="bar" aria-label="Emergency Fund progress"><span id="efBar"></span></div>
-      </div>
+				<div class="ef-wrap">
+					<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+						<div><strong>Emergency Fund Progress</strong></div>
+						<div class="mini">
+							<div class="box"><div class="k">Current</div><div class="v" id="efNow">$0</div></div>
+							<div class="box"><div class="k">Goal</div><div class="v" id="efGoalMini">$0</div></div>
+						</div>
+					</div>
+					<div class="bar" aria-label="Emergency Fund progress"><span id="efBar"></span></div>
+				</div>
 
-      <div class="divider"></div>
+				<div class="divider"></div>
 
-      <div class="mini">
-        <div class="box"><div class="k">Investing: Contributions</div><div class="v" id="invContrib">$0</div></div>
-        <div class="box"><div class="k">Investing: Growth</div><div class="v" id="invGrowth">$0</div></div>
-        <div class="box"><div class="k">Savings: Contributions</div><div class="v" id="savContrib">$0</div></div>
-        <div class="box"><div class="k">Savings: Interest</div><div class="v" id="savGrowth">$0</div></div>
-      </div>
+				<div class="mini">
+					<div class="box"><div class="k">Investing: Contributions</div><div class="v" id="invContrib">$0</div></div>
+					<div class="box"><div class="k">Investing: Growth</div><div class="v" id="invGrowth">$0</div></div>
+					<div class="box"><div class="k">Savings: Contributions</div><div class="v" id="savContrib">$0</div></div>
+					<div class="box"><div class="k">Savings: Interest</div><div class="v" id="savGrowth">$0</div></div>
+				</div>
 
-      <div class="divider"></div>
+				<div class="divider"></div>
 
-      <div class="right">
-        <div class="pill">Order of Operations</div>
-        <div class="pill">Assumes consistent contributions & returns</div>
-      </div>
+				<div class="right">
+					<div class="pill">Order of Operations</div>
+					<div class="pill">Assumes consistent contributions & returns</div>
+				</div>
 
-      <ol class="oplist" id="ops">
-        <li><strong>Build your emergency fund</strong> to <span id="efExplain">6 months of expenses</span>.</li>
-        <li><strong>Invest</strong> <span id="investExplain">15%</span> of each paycheck.</li>
-        <li><strong>After your emergency fund is full</strong>, <span id="redirExplain">redirect the Savings % to Investing</span>.</li>
-      </ol>
+				<ol class="oplist" id="ops">
+					<li><strong>Build your emergency fund</strong> to <span id="efExplain">6 months of expenses</span>.</li>
+					<li><strong>Invest</strong> <span id="investExplain">15%</span> of each paycheck.</li>
+					<li><strong>After your emergency fund is full</strong>, <span id="redirExplain">redirect the Savings % to Investing</span>.</li>
+				</ol>
 
-      <div class="divider"></div>
+				<div class="divider"></div>
 
-      <div class="chart-box">
-        <canvas id="chart"></canvas>
-      </div>
+				<div class="chart-box">
+					<canvas id="chart"></canvas>
+				</div>
 
-      <div class="divider"></div>
+				<div class="divider"></div>
 
-      <div class="mini">
-        <div class="box"><div class="k">Milestone</div><div class="v" id="mileEF">EF: —</div></div>
-        <div class="box"><div class="k">$100k invested</div><div class="v" id="mile100k">—</div></div>
-        <div class="box"><div class="k">$250k invested</div><div class="v" id="mile250k">—</div></div>
-        <div class="box"><div class="k">$500k invested</div><div class="v" id="mile500k">—</div></div>
-      </div>
+				<div class="mini">
+					<div class="box"><div class="k">Milestone</div><div class="v" id="mileEF">EF: —</div></div>
+					<div class="box"><div class="k">$100k invested</div><div class="v" id="mile100k">—</div></div>
+					<div class="box"><div class="k">$250k invested</div><div class="v" id="mile250k">—</div></div>
+					<div class="box"><div class="k">$500k invested</div><div class="v" id="mile500k">—</div></div>
+				</div>
 
-      <p class="footer">
-        <strong>What is "6 months of living expenses"?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal.
-      </p>
-      <p class="footer">
-        Educational tool only. Returns aren't guaranteed; personal situations vary.
-      </p>
-    </section>
-  </div>
-</div>
+				<p class="footer">
+					<strong>What is "6 months of living expenses"?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal.
+				</p>
+				<p class="footer">
+					Educational tool only. Returns aren't guaranteed; personal situations vary.
+				</p>
+			</section>
+		</div>
+	</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
-<script>
-  // ============== Helpers ==============
-  const $ = (id)=>document.getElementById(id);
-  const setStatus = (msg)=>{ const s=$('status'); if(s) s.textContent=msg; };
-  const fmt = (n)=> n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
-  const monthsWords = (p)=>{
-    const y=Math.floor(p/12), m=p%12;
-    if (p===Infinity) return 'Not reached';
-    if (y===0) return `${m} month${m!==1?'s':''}`;
-    if (m===0) return `${y} year${y!==1?'s':''}`;
-    return `${y}y ${m}m`;
-  };
-  
-  // Fixed getVar function with better error handling
-  const getVar=(name)=> {
-    try {
-      const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      return value || (name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc');
-    } catch(e) {
-      console.warn('Error getting CSS variable:', name, e);
-      return name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc';
-    }
-  };
+	<!-- Chart.js (CDN) -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"
+		integrity="sha256-AI3YdXzNQ+TiLHH0SRtG3/DB7P8t3Dm2hGq3bD16Q08="
+		crossorigin="anonymous"></script>
 
-  // Chart variable - initialize as null
-  let chart = null;
-  let DOM_READY = false;
+	<script>
+	// ============== Helpers ==============
+	const $ = (id)=>document.getElementById(id);
+	const setStatus = (msg)=>{ const s=$('status'); if(s) s.textContent=msg; };
+	const fmt = (n)=> (isFinite(n)? n:0).toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+	const monthsWords = (p)=>{
+		if (p===Infinity) return 'Not reached';
+		const y=Math.floor(p/12), m=p%12;
+		if (y===0) return `${m} month${m!==1?'s':''}`;
+		if (m===0) return `${y} year${y!==1?'s':''}`;
+		return `${y}y ${m}m`;
+	};
 
-  // ============== Theme handling (icon button cycles Auto → Light → Dark) ==============
-  const THEME_KEY = 'futurecalc_theme';
-  const themeModes = ['auto','light','dark'];
-  const themeIcons = { auto:'A', light:'☀️', dark:'🌙' };
-  const themeLabels = { auto:'Theme: Auto', light:'Theme: Light', dark:'Theme: Dark' };
+	// Safer CSS var getter
+	const getVar=(name)=> {
+		try {
+			const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+			if (value) return value;
+		} catch(e) { console.warn('Error getting CSS variable:', name, e); }
+		return name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc';
+	};
 
-  function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
-  
-  function applyTheme(mode){
-    const root = document.documentElement;
-    root.setAttribute('data-theme', mode === 'auto' ? (systemPrefersDark() ? 'dark' : 'light') : mode);
-    localStorage.setItem(THEME_KEY, mode);
-    const btn = $('themeBtn');
-    if (btn){ 
-      btn.textContent = themeIcons[mode]; 
-      btn.setAttribute('aria-label', themeLabels[mode]); 
-      btn.title = themeLabels[mode]; 
-    }
-    
-    // Only re-render chart if DOM is ready, canvas exists, and we have a chart
-    if (DOM_READY && $('chart') && chart) {
-      try { 
-        const results = calculate();
-        if (results) {
-          render(results); 
-        }
-      } catch(e){ 
-        console.error('Theme change chart re-render failed:', e); 
-      }
-    }
-  }
-  
-  function initTheme(){
-    const saved = localStorage.getItem(THEME_KEY) || 'auto';
-    applyTheme(saved);
-    if (window.matchMedia) {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{
-        const current = localStorage.getItem(THEME_KEY) || 'auto';
-        if (current === 'auto') applyTheme('auto');
-      });
-    }
-  }
-  
-  function cycleTheme(){
-    const current = localStorage.getItem(THEME_KEY) || 'auto';
-    const idx = themeModes.indexOf(current);
-    const next = themeModes[(idx+1)%themeModes.length];
-    applyTheme(next);
-  }
+	// Chart variable - initialize as null
+	let chart = null;
+	let DOM_READY = false;
 
-  // ============== Core math ==============
-  function calculate(){
-    // Check if Chart.js loaded
-    if (!window.Chart){ 
-      setStatus('Chart library not loaded');
-      return null; 
-    }
+	// ============== Theme handling (icon button cycles Auto → Light → Dark) ==============
+	const THEME_KEY = 'futurecalc_theme';
+	const themeModes = ['auto','light','dark'];
+	const themeIcons = { auto:'A', light:'☀️', dark:'🌙' };
+	const themeLabels = { auto:'Theme: Auto', light:'Theme: Light', dark:'Theme: Dark' };
 
-    const gross=+($('gross')?.value||0);
-    const periodsPerYear=+($('frequency')?.value||26);
-    const years=+($('years')?.value||30);
-    const investPct=Math.min(100,Math.max(0,+($('investPct')?.value||0)))/100;
-    const savePct=Math.min(100,Math.max(0,+($('savePct')?.value||0)))/100;
-    const annualReturn=Math.max(0,+($('annualReturn')?.value||0))/100;
-    const savingsApy=Math.max(0,+($('savingsApy')?.value||0))/100;
-    const monthlyExpenses=+($('monthlyExpenses')?.value||0);
-    const redirect=$('redirect')?.checked ?? true;
+	function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
 
-    setStatus('Calculating…');
-    
-    // Better validation
-    if (!gross || gross <= 0) {
-      setStatus('Enter a valid paycheck amount');
-      return null;
-    }
-    
-    if (!(investPct+savePct) || (investPct+savePct) <= 0) {
-      setStatus('Enter investment or savings percentages');
-      return null;
-    }
-    
-    if (!years || years <= 0) {
-      setStatus('Enter valid projection years');
-      return null;
-    }
+	function applyTheme(mode){
+		const root = document.documentElement;
+		root.setAttribute('data-theme', mode === 'auto' ? (systemPrefersDark() ? 'dark' : 'light') : mode);
+		try { localStorage.setItem(THEME_KEY, mode); } catch {}
+		const btn = $('themeBtn');
+		if (btn){
+			btn.textContent = themeIcons[mode];
+			btn.setAttribute('aria-label', themeLabels[mode]);
+			btn.title = themeLabels[mode];
+		}
 
-    const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
-    const totalP = years*periodsPerYear;
-    const rI = Math.pow(1+annualReturn,1/periodsPerYear)-1;
-    const rS = Math.pow(1+savingsApy,1/periodsPerYear)-1;
+		// Re-render if possible
+		if (DOM_READY && $('chart') && (window.Chart)) {
+			try {
+				const results = calculate();
+				if (results) render(results);
+			} catch(e){
+				console.error('Theme change chart re-render failed:', e);
+			}
+		}
+	}
 
-    let inv=0, sav=0, efAt=Infinity;
-    let invContrib=0, invGrowth=0;
-    let savContrib=0, savGrowth=0;
+	function initTheme(){
+		let saved = 'auto';
+		try { saved = localStorage.getItem(THEME_KEY) || 'auto'; } catch {}
+		applyTheme(saved);
+		if (window.matchMedia) {
+			const mq = window.matchMedia('(prefers-color-scheme: dark)');
+			// addEventListener for modern, fallback to addListener for older
+			if (mq.addEventListener) {
+				mq.addEventListener('change', ()=>{ const current = (localStorage.getItem(THEME_KEY) || 'auto'); if (current === 'auto') applyTheme('auto'); });
+			} else if (mq.addListener) {
+				mq.addListener(()=>{ const current = (localStorage.getItem(THEME_KEY) || 'auto'); if (current === 'auto') applyTheme('auto'); });
+			}
+		}
+	}
 
-    const invP=[], savP=[];
-    const investMilestones = { '100000': Infinity, '250000': Infinity, '500000': Infinity };
+	function cycleTheme(){
+		const current = (localStorage.getItem(THEME_KEY) || 'auto');
+		const idx = themeModes.indexOf(current);
+		const next = themeModes[(idx+1)%themeModes.length];
+		applyTheme(next);
+	}
 
-    for(let p=0;p<=totalP;p++){
-      invP.push(inv); savP.push(sav);
-      if(p===totalP) break;
+	// ============== Core math ==============
+	function calculate(){
+		const gross=+($('gross')?.value||0);
+		const periodsPerYear=+($('frequency')?.value||26);
+		const years=+($('years')?.value||30);
+		const investPct=Math.min(100,Math.max(0,+($('investPct')?.value||0)))/100;
+		const savePct=Math.min(100,Math.max(0,+($('savePct')?.value||0)))/100;
+		const annualReturn=Math.max(0,+($('annualReturn')?.value||0))/100;
+		const savingsApy=Math.max(0,+($('savingsApy')?.value||0))/100;
+		const monthlyExpenses=+($('monthlyExpenses')?.value||0);
+		const redirect=$('redirect')?.checked ?? true;
 
-      let cI=investPct*gross, cS=savePct*gross;
+		setStatus('Calculating…');
 
-      // EF stop/redirect
-      if(efGoal>0 && sav>=efGoal-0.005){
-        if(efAt===Infinity) efAt=p;
-        cS=0; if(redirect) cI+=savePct*gross;
-      }
+		// Validation
+		if (!gross || gross <= 0) { setStatus('Enter a valid paycheck amount'); return null; }
+		if (!((investPct+savePct) > 0)) { setStatus('Enter investment or savings percentages'); return null; }
+		if (!years || years <= 0) { setStatus('Enter valid projection years'); return null; }
 
-      // Growth this period (before contributions)
-      const gI = inv * rI;
-      const gS = sav * rS;
+		const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
+		const totalP = Math.round(years*periodsPerYear);
+		const rI = Math.pow(1+annualReturn,1/periodsPerYear)-1;
+		const rS = Math.pow(1+savingsApy,1/periodsPerYear)-1;
 
-      // Update balances
-      inv = inv + gI + cI;
-      sav = (efGoal>0) ? Math.min(efGoal, sav + gS + cS) : sav + gS + cS;
+		let inv=0, sav=0, efAt=Infinity;
+		let invContrib=0, invGrowth=0;
+		let savContrib=0, savGrowth=0;
 
-      // Sums
-      invContrib += cI;
-      invGrowth  += gI;
+		const invP=[], savP=[];
+		const investMilestones = { '100000': Infinity, '250000': Infinity, '500000': Infinity };
 
-      // realized savings interest (don't overcount if at cap)
-      const realizedS = (efGoal>0)
-        ? Math.max(0, Math.min(efGoal, sav) - Math.min(efGoal, sav - gS - cS) - cS)
-        : gS;
-      savContrib += cS;
-      savGrowth  += realizedS;
+		for(let p=0;p<=totalP;p++){
+			invP.push(inv); savP.push(sav);
+			if(p===totalP) break;
 
-      // milestones
-      const after = inv;
-      for (const k of Object.keys(investMilestones)){
-        if (investMilestones[k]===Infinity && after >= +k) investMilestones[k]=p;
-      }
-    }
+			let cI=investPct*gross, cS=savePct*gross;
 
-    return {
-      inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years,
-      invContrib, invGrowth, savContrib, savGrowth, investMilestones
-    };
-  }
+			// EF stop/redirect
+			if(efGoal>0 && sav>=efGoal-0.005){
+				if(efAt===Infinity) efAt=p;
+				cS=0; if(redirect) cI+=savePct*gross;
+			}
 
-  // ============== Render ==============
-  const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
+			// Growth this period (before contributions)
+			const gI = inv * rI;
+			const gS = sav * rS;
 
-  function render(res){
-    if(!res){ 
-      setStatus('No results to render');
-      return; 
-    }
-    
-    setStatus('Rendering…');
+			// Update balances
+			inv = inv + gI + cI;
+			sav = (efGoal>0) ? Math.min(efGoal, sav + gS + cS) : sav + gS + cS;
 
-    try {
-      // Totals
-      $('investTotal').textContent=fmt(res.inv);
-      $('saveTotal').textContent=fmt(res.sav);
-      $('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
-      $('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
+			// Sums
+			invContrib += cI;
+			invGrowth  += gI;
 
-      // EF progress
-      $('efNow').textContent=fmt(res.sav);
-      $('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
-      const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
-      $('efBar').style.width = pct + '%';
+			// realized savings interest (don't overcount if at cap)
+			const realizedS = (efGoal>0)
+				? Math.max(0, Math.min(efGoal, sav) - Math.min(efGoal, sav - gS - cS) - cS)
+				: gS;
+			savContrib += cS;
+			savGrowth  += realizedS;
 
-      // Contributions vs growth
-      $('invContrib').textContent = fmt(res.invContrib);
-      $('invGrowth').textContent  = fmt(Math.max(0, res.inv - res.invContrib));
-      $('savContrib').textContent = fmt(res.savContrib);
-      $('savGrowth').textContent  = fmt(res.savGrowth);
+			// milestones
+			const after = inv;
+			for (const k of Object.keys(investMilestones)){
+				if (investMilestones[k]===Infinity && after >= +k) investMilestones[k]=p;
+			}
+		}
 
-      // copy text updates
-      $('efExplain').textContent='6 months of your essential monthly expenses';
-      $('investExplain').textContent=`${$('investPct').value}%`;
-      $('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
+		return {
+			inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years,
+			invContrib, invGrowth, savContrib, savGrowth, investMilestones
+		};
+	}
 
-      // Update milestones
-      const periodsToTime = (p) => p === Infinity ? '—' : monthsWords(Math.round(p*12/res.periodsPerYear));
-      $('mileEF').textContent = res.efAt === Infinity ? 'EF: Not reached' : `EF: ${periodsToTime(res.efAt)}`;
-      $('mile100k').textContent = periodsToTime(res.investMilestones['100000']);
-      $('mile250k').textContent = periodsToTime(res.investMilestones['250000']);
-      $('mile500k').textContent = periodsToTime(res.investMilestones['500000']);
+	// ============== Render ==============
+	const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
 
-      // yearly downsample
-      const invY=[], savY=[];
-      for(let y=0;y<=res.years;y++){ 
-        const i=y*res.periodsPerYear; 
-        invY.push(res.invP[i] || 0); 
-        savY.push(res.savP[i] || 0); 
-      }
+	function render(res){
+		if(!res){ setStatus('No results to render'); return; }
 
-      // Chart rendering with better error handling
-      const canvas = $('chart');
-      if (!canvas){
-        setStatus('Canvas not found');
-        console.error('Canvas #chart missing in DOM.');
-        return;
-      }
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx){
-        setStatus('Canvas context failed');
-        console.error('getContext("2d") returned null');
-        return;
-      }
+		setStatus('Rendering…');
 
-      // Destroy existing chart
-      if(chart) {
-        try {
-          chart.destroy();
-        } catch(e) {
-          console.warn('Chart destroy failed:', e);
-        }
-        chart = null;
-      }
+		try {
+			// Totals
+			$('investTotal').textContent=fmt(res.inv);
+			$('saveTotal').textContent=fmt(res.sav);
+			$('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
+			$('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
 
-      // Create new chart with error handling
-      try {
-        chart = new Chart(ctx, {
-          type:'line',
-          data:{
-            labels:yearLabels(res.years),
-            datasets:[
-              {
-                label:'Investing balance', 
-                data:invY, 
-                borderColor:getVar('--blue'), 
-                backgroundColor:getVar('--blueFill'), 
-                fill:true, 
-                tension:.2
-              },
-              {
-                label:'Savings balance',   
-                data:savY, 
-                borderColor:getVar('--green'), 
-                backgroundColor:getVar('--greenFill'), 
-                fill:true, 
-                tension:.2
-              }
-            ]
-          },
-          options:{
-            responsive:true, 
-            maintainAspectRatio:false, 
-            interaction:{mode:'index',intersect:false},
-            plugins:{
-              legend:{labels:{color:getVar('--muted')}},
-              tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}
-            },
-            scales:{
-              x:{
-                ticks:{color:getVar('--muted')}, 
-                grid:{color:getVar('--gridSoft')}
-              },
-              y:{
-                ticks:{
-                  color:getVar('--muted'), 
-                  callback:(v)=>'$'+Intl.NumberFormat().format(v)
-                }, 
-                grid:{color:getVar('--gridSoft')}
-              }
-            },
-            elements:{point:{radius:0}}
-          }
-        });
-        setStatus('Done');
-      } catch(e) {
-        console.error('Chart creation failed:', e);
-        setStatus('Chart creation failed');
-        return;
-      }
-      
-    } catch(e) {
-      console.error('Render failed:', e);
-      setStatus('Render failed');
-    }
-  }
+			// EF progress
+			$('efNow').textContent=fmt(res.sav);
+			$('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
+			const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
+			$('efBar').style.width = pct + '%';
 
-  // ============== DOM Ready ==============
-  document.addEventListener('DOMContentLoaded', ()=>{
-    DOM_READY = true;
+			// Contributions vs growth
+			$('invContrib').textContent = fmt(res.invContrib);
+			$('invGrowth').textContent  = fmt(res.invGrowth);
+			$('savContrib').textContent = fmt(res.savContrib);
+			$('savGrowth').textContent  = fmt(res.savGrowth);
 
-    // Check Chart.js availability
-    if (!window.Chart){
-      setStatus('Chart.js failed to load');
-      console.error('Chart.js not available. Check network connection or ad blockers.');
-      return;
-    }
+			// copy text updates
+			$('efExplain').textContent='6 months of your essential monthly expenses';
+			$('investExplain').textContent=`${$('investPct').value}%`;
+			$('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
 
-    // Theme setup
-    const btn = $('themeBtn');
-    if (btn) btn.addEventListener('click', cycleTheme);
-    initTheme();
+			// Update milestones
+			const periodsToTime = (p) => p === Infinity ? '—' : monthsWords(Math.round(p*12/res.periodsPerYear));
+			$('mileEF').textContent = res.efAt === Infinity ? 'EF: Not reached' : `EF: ${periodsToTime(res.efAt)}`;
+			$('mile100k').textContent = periodsToTime(res.investMilestones['100000']);
+			$('mile250k').textContent = periodsToTime(res.investMilestones['250000']);
+			$('mile500k').textContent = periodsToTime(res.investMilestones['500000']);
 
-    // Input persistence
-    const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
-    
-    function saveInputs(){
-      try {
-        const d={};
-        fields.forEach(f=>{
-          const el=$(f);
-          if (el) {
-            d[f]=el.type==='checkbox'?el.checked:el.value;
-          }
-        });
-        localStorage.setItem('futurecalc_inputs',JSON.stringify(d));
-      } catch(e) {
-        console.warn('Failed to save inputs:', e);
-      }
-    }
-    
-    function loadInputs(){
-      try {
-        const raw=localStorage.getItem('futurecalc_inputs'); 
-        if(!raw) return; 
-        const d=JSON.parse(raw); 
-        fields.forEach(f=>{
-          if(d[f]!==undefined){
-            const el=$(f); 
-            if (el) {
-              if (el.type==='checkbox') {
-                el.checked=d[f];
-              } else {
-                el.value=d[f];
-              }
-            }
-          }
-        });
-      } catch(e) {
-        console.warn('Failed to load inputs:', e);
-      }
-    }
+			// yearly downsample
+			const invY=[], savY=[];
+			for(let y=0;y<=res.years;y++){
+				const i=y*res.periodsPerYear;
+				invY.push(res.invP[i] || 0);
+				savY.push(res.savP[i] || 0);
+			}
 
-    // Set up input event listeners
-    fields.forEach(f=>{
-      const el=$(f); 
-      if(el){ 
-        el.addEventListener('input',saveInputs); 
-        el.addEventListener('change',saveInputs); 
-      }
-    });
-    
-    // Load saved inputs
-    loadInputs();
+			// Chart rendering — only if Chart.js present
+			const canvas = $('chart');
+			if (!canvas){
+				setStatus('Canvas not found');
+				console.error('Canvas #chart missing in DOM.');
+				return;
+			}
+			const ctx = canvas.getContext('2d');
+			if (!ctx){
+				setStatus('Canvas context failed');
+				console.error('getContext("2d") returned null');
+				return;
+			}
 
-    // Slider <-> input synchronization
-    function syncPair(numId, sliderId){
-      const num=$(numId), rng=$(sliderId);
-      if (!num || !rng) return;
-      num.addEventListener('input',()=>{rng.value=num.value;});
-      rng.addEventListener('input',()=>{num.value=rng.value;});
-    }
-    syncPair('investPct','investSlider');
-    syncPair('savePct','saveSlider');
+			// Destroy existing chart
+			if(chart) {
+				try { chart.destroy(); } catch(e) { console.warn('Chart destroy failed:', e); }
+				chart = null;
+			}
 
-    // Button handlers
-    const runBtn=$('run'), resetBtn=$('reset');
-    if (runBtn) {
-      runBtn.addEventListener('click',()=>{
-        const results = calculate();
-        if (results) {
-          render(results);
-        }
-      });
-    }
-    
-    if (resetBtn) {
-      resetBtn.addEventListener('click',()=>{
-        try {
-          localStorage.removeItem('futurecalc_inputs'); 
-          location.reload();
-        } catch(e) {
-          console.warn('Reset failed:', e);
-          // Fallback: just clear the form
-          fields.forEach(f => {
-            const el = $(f);
-            if (el) {
-              if (el.type === 'checkbox') {
-                el.checked = f === 'redirect'; // Default redirect to true
-              } else {
-                el.value = '';
-              }
-            }
-          });
-        }
-      });
-    }
+			if (window.Chart) {
+				try {
+					chart = new Chart(ctx, {
+						type:'line',
+						data:{
+							labels:yearLabels(res.years),
+							datasets:[
+								{
+									label:'Investing balance',
+									data:invY,
+									borderColor:getVar('--blue'),
+									backgroundColor:getVar('--blueFill'),
+									fill:true,
+									tension:.2
+								},
+								{
+									label:'Savings balance',
+									data:savY,
+									borderColor:getVar('--green'),
+									backgroundColor:getVar('--greenFill'),
+									fill:true,
+									tension:.2
+								}
+							]
+						},
+						options:{
+							responsive:true,
+							maintainAspectRatio:false,
+							interaction:{mode:'index',intersect:false},
+							plugins:{
+								legend:{labels:{color:getVar('--muted')}},
+								tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}
+							},
+							scales:{
+								x:{
+									ticks:{color:getVar('--muted')},
+									grid:{color:getVar('--gridSoft')}
+								},
+								y:{
+									ticks:{
+										color:getVar('--muted'),
+										callback:(v)=>'$'+Intl.NumberFormat().format(v)
+									},
+									grid:{color:getVar('--gridSoft')}
+								}
+							},
+							elements:{point:{radius:0}}
+						}
+					});
+					setStatus('Done');
+				} catch(e) {
+					console.error('Chart creation failed:', e);
+					setStatus('Chart creation failed');
+				}
+			} else {
+				// Graceful no-chart mode
+				setStatus('Done (no chart)');
+			}
 
-    // Auto-run if we have basic inputs
-    const grossEl = $('gross');
-    const expensesEl = $('monthlyExpenses');
-    if (grossEl?.value && expensesEl?.value) {
-      setTimeout(() => {
-        const results = calculate();
-        if (results) {
-          render(results);
-        }
-      }, 100); // Small delay to ensure everything is loaded
-    }
-  });
-</script>
+		} catch(e) {
+			console.error('Render failed:', e);
+			setStatus('Render failed');
+		}
+	}
+
+	// ============== DOM Ready ==============
+	document.addEventListener('DOMContentLoaded', ()=>{
+		DOM_READY = true;
+
+		// Theme setup
+		const btn = $('themeBtn');
+		if (btn) btn.addEventListener('click', cycleTheme);
+		initTheme();
+
+		// Input persistence
+		const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
+
+		function saveInputs(){
+			try {
+				const d={};
+				fields.forEach(f=>{
+					const el=$(f);
+					if (el) d[f]=el.type==='checkbox'?el.checked:el.value;
+				});
+				localStorage.setItem('futurecalc_inputs',JSON.stringify(d));
+			} catch(e) { console.warn('Failed to save inputs:', e); }
+		}
+
+		function loadInputs(){
+			try {
+				const raw=localStorage.getItem('futurecalc_inputs');
+				if(!raw) return;
+				const d=JSON.parse(raw);
+				fields.forEach(f=>{
+					if(d[f]!==undefined){
+						const el=$(f);
+						if (el) {
+							if (el.type==='checkbox') el.checked=d[f];
+							else el.value=d[f];
+						}
+					}
+				});
+			} catch(e) { console.warn('Failed to load inputs:', e); }
+		}
+
+		fields.forEach(f=>{
+			const el=$(f);
+			if(el){
+				el.addEventListener('input',saveInputs);
+				el.addEventListener('change',saveInputs);
+			}
+		});
+
+		loadInputs();
+
+		// Slider <-> input synchronization
+		function syncPair(numId, sliderId){
+			const num=$(numId), rng=$(sliderId);
+			if (!num || !rng) return;
+			num.addEventListener('input',()=>{rng.value=num.value;});
+			rng.addEventListener('input',()=>{num.value=rng.value;});
+		}
+		syncPair('investPct','investSlider');
+		syncPair('savePct','saveSlider');
+
+		// Button handlers
+		const runBtn=$('run'), resetBtn=$('reset');
+		if (runBtn) {
+			runBtn.addEventListener('click',()=>{
+				const results = calculate();
+				if (results) render(results);
+			});
+		}
+
+		if (resetBtn) {
+			resetBtn.addEventListener('click',()=>{
+				try {
+					localStorage.removeItem('futurecalc_inputs');
+					location.reload();
+				} catch(e) {
+					console.warn('Reset failed:', e);
+					// Fallback: just clear the form
+					fields.forEach(f => {
+						const el = $(f);
+						if (el) {
+							if (el.type === 'checkbox') el.checked = (f === 'redirect');
+							else el.value = '';
+						}
+					});
+				}
+			});
+		}
+
+		// Auto-run if we have basic inputs
+		const grossEl = $('gross');
+		const expensesEl = $('monthlyExpenses');
+		if (grossEl?.value && expensesEl?.value) {
+			setTimeout(() => {
+				const results = calculate();
+				if (results) render(results);
+			}, 100);
+		}
+	});
+	</script>
 </body>
 </html>
