@@ -667,15 +667,24 @@ function runDebt(){
 	const st = document.getElementById('statusDebt');
 	if (debts.length===0){ st.textContent='Add at least one debt'; return; }
 	st.textContent='Calculating…';
+
+	// payoff simulation
 	const {rows, months, totalInterest} = payoffSchedule(debts, extra, strategy);
+
+	// NEW: compute total principal and total paid
+	const principal = debts.reduce((sum, d) => sum + d.bal, 0);
+	const totalPaid = principal + totalInterest;
+
 	document.getElementById('debtTime').textContent = FC.monthsWords(months);
 	document.getElementById('debtInterest').textContent = FC.fmt(totalInterest);
-	document.getElementById('debtTotal').textContent = '—';
+	document.getElementById('debtTotal').textContent = FC.fmt(totalPaid);
 	document.getElementById('debtStrat').textContent = strategy==='snowball'?'Snowball':'Avalanche';
+
 	const box = document.getElementById('debtMilestones'); box.innerHTML='';
 	const div=document.createElement('div'); div.className='box';
 	div.innerHTML = `<div class="k">All debts paid</div><div class="v">${months? 'Month '+months : '—'}</div>`;
 	box.appendChild(div);
+
 	document.getElementById('exportDebt').onclick = ()=> FC.downloadCSV('debt_summary_balance.csv', FC.toCSV(rows));
 	renderDebtChart(rows);
 	st.textContent='Done';
