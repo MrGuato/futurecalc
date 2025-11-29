@@ -339,23 +339,83 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 			<section id="sec-crypto" class="calc-sec">
 				<section class="card">
 					<h2>Crypto DCA</h2>
+					<div class="help">
+						Model dollar-cost averaging into a major crypto over time. Prices are simulated around a starting price (manual, live API, or defaults).
+					</div>
+
 					<div class="row">
-						<div><label>Contribution (per period)</label><input id="cAmt" type="number" min="0" step="1" value="200"/></div>
-						<div><label>Frequency</label>
+						<div>
+							<label>Coin</label>
+							<select id="cCoin">
+								<option value="bitcoin">Bitcoin (BTC)</option>
+								<option value="ethereum">Ethereum (ETH)</option>
+								<option value="solana">Solana (SOL)</option>
+								<option value="binancecoin">BNB (BNB)</option>
+								<option value="ripple">XRP (XRP)</option>
+							</select>
+							<div class="help" id="cLivePrice">Starting price: —</div>
+						</div>
+						<div>
+							<label>Contribution (per period)</label>
+							<input id="cAmt" type="number" min="0" step="1" value="200" />
+						</div>
+					</div>
+
+					<div class="row">
+						<div>
+							<label>Frequency</label>
 							<select id="cFreq">
 								<option value="12">Monthly</option>
 								<option value="26" selected>Bi-weekly</option>
 								<option value="52">Weekly</option>
 							</select>
 						</div>
+						<div>
+							<label>Years</label>
+							<input id="cYears" type="number" min="1" max="30" value="5" />
+						</div>
 					</div>
+
 					<div class="row">
-						<div><label>Years</label><input id="cYears" type="number" min="1" max="30" value="5"/></div>
-						<div><label>Fee per trade (%)</label><input id="cFee" type="number" min="0" step="0.01" value="0.2"/></div>
+						<div>
+							<label>Current price (optional)</label>
+							<input id="cPrice" type="number" min="0" step="0.01" placeholder="e.g., 50000" />
+							<div class="help">If set, this is used as the starting price.</div>
+						</div>
+						<div>
+							<label>&nbsp;</label>
+							<div class="help">Leave blank to use live/API or defaults.</div>
+						</div>
 					</div>
-					<div class="help">Paste or simulate price series. If left blank, a log-normal path is simulated with annualized 60% volatility and 10% drift (illustrative).</div>
-					<label>Price series (CSV of prices per period, optional)</label>
-					<textarea id="cSeries" rows="4"></textarea>
+
+					<div class="row">
+						<div>
+							<label>Fee per trade (%)</label>
+							<input id="cFee" type="number" min="0" step="0.01" value="0.2" />
+						</div>
+						<div>
+							<label>Price source</label>
+							<select id="cMode">
+								<option value="sim">Simulated only / defaults</option>
+								<option value="live">Seed from live price (API key)</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<details>
+						<summary style="cursor:pointer;font-size:13px;color:var(--muted)">
+							Developer settings (optional): live price API
+						</summary>
+						<label style="margin-top:6px">CoinGecko API key (stored locally)</label>
+						<input id="cgApiKey" type="text" placeholder="x-cg-pro-api-key" />
+						<div class="help">
+							Your key is stored only in this browser via localStorage and used to fetch the current USD price for the selected coin.
+						</div>
+						<button type="button" class="btn secondary" id="saveCgKey" style="margin-top:6px">Save key</button>
+					</details>
+
 					<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
 						<button type="button" class="btn" id="runCrypto">Calculate</button>
 						<button type="button" class="btn secondary" id="exportCrypto">Export CSV</button>
@@ -668,10 +728,8 @@ function runDebt(){
 	if (debts.length===0){ st.textContent='Add at least one debt'; return; }
 	st.textContent='Calculating…';
 
-	// payoff simulation
 	const {rows, months, totalInterest} = payoffSchedule(debts, extra, strategy);
 
-	// NEW: compute total principal and total paid
 	const principal = debts.reduce((sum, d) => sum + d.bal, 0);
 	const totalPaid = principal + totalInterest;
 
@@ -752,42 +810,91 @@ function runMortgage(){
 }
 
 /* ========= Crypto ========= */
-function parseSeries(text){
-	const vals = text.split(/[\s,]+/).map(v=>+v).filter(v=>isFinite(v) && v>0);
-	return vals.length ? vals : null;
-}
-function simulateSeries(n, driftA=0.10, volA=0.60, start=100){
+
+const CRYPTO_DEFAULT_PRICES = {
+	bitcoin: 50000,
+	ethereum: 3000,
+	solana: 150,
+	binancecoin: 500,
+	ripple: 1
+};
+
+// Simple lognormal-ish simulation, anchored on a starting price
+function simulateSeriesFrom(startPrice, periods, driftA=0.10, volA=0.60){
 	const mu = driftA, sigma = volA;
-	const mu_p = mu / n, sig_p = sigma / Math.sqrt(n);
-	let p = start, arr=[p];
-	for (let k=1;k<n;k++){
+	const mu_p = mu / periods;
+	const sig_p = sigma / Math.sqrt(periods);
+	let p = startPrice;
+	const arr=[p];
+	for (let k=1;k<periods;k++){
 		const z = Math.max(-4, Math.min(4, (Math.random()*2-1) + (Math.random()*2-1)));
 		p = p * Math.exp((mu_p - 0.5*sig_p*sig_p) + sig_p*z);
 		arr.push(Math.max(0.01, p));
 	}
 	return arr;
 }
-function dca(cAmt, freq, years, feePct, series){
+
+// DCA engine for a single coin & price path
+function dcaSingle(cAmt, freq, years, feePct, prices){
 	const N = Math.round(freq*years);
-	const prices = series && series.length>=N ? series.slice(0,N)
-		: (series && series.length>0 ? [...series, ...Array(N-series.length).fill(series.at(-1))] : simulateSeries(N, 0.10, 0.60, 100));
-	let units=0, cost=0, fees=0, rows=[['Period','Price','Buy $','Fee $','Units','Cum Units','Cum Cost','Portfolio $','Contrib $']];
+	const usedPrices = prices.length >= N
+		? prices.slice(0,N)
+		: [...prices, ...Array(Math.max(0, N - prices.length)).fill(prices.at(-1))];
+
+	let units=0, cost=0, fees=0;
+	const rows=[['Period','Price','Buy $','Fee $','Units','Cum Units','Cum Cost','Portfolio $','Contrib $']];
+
 	for (let i=0;i<N;i++){
-	 const price = prices[i];
-	 const fee = cAmt * (feePct/100);
-	 const buy = Math.max(0, cAmt - fee);
-	 const u = buy / price;
-	 units += u;
-	 cost += buy;
-	 fees += fee;
-	 const portfolio = units * price;
-	 const contributed = cost + fees;
-	 rows.push([i+1, price, buy, fee, u, units, contributed, portfolio, contributed]);
+		const price = usedPrices[i];
+		const fee = cAmt * (feePct/100);
+		const buy = Math.max(0, cAmt - fee);
+		const u = price>0 ? buy/price : 0;
+		units += u;
+		cost += buy;
+		fees += fee;
+		const portfolio = units * price;
+		const contributed = cost + fees;
+		rows.push([i+1, price, buy, fee, u, units, contributed, portfolio, contributed]);
 	}
+
 	const endValue = rows.at(-1)[7];
-	const mdd = (()=>{ let peak=0, m=0; for (let i=1;i<rows.length;i++){ const v=rows[i][7]; peak=Math.max(peak,v); m=Math.max(m, peak? (peak-v)/peak:0);} return m; })();
+	const mdd = (()=>{ 
+		let peak=0, m=0; 
+		for (let i=1;i<rows.length;i++){ 
+			const v=rows[i][7]; 
+			peak=Math.max(peak,v); 
+			m=Math.max(m, peak? (peak-v)/peak:0);
+		}
+		return m; 
+	})();
+
 	return {rows, endValue, mdd};
 }
+
+// CoinGecko live price fetch (requires Pro API key)
+async function fetchLivePrice(coinId){
+	const keyInput = document.getElementById('cgApiKey');
+	const apiKey = (keyInput && keyInput.value.trim()) || (()=>{ 
+		try { return localStorage.getItem('futurecalc_cg_key') || ''; } catch(e){ return ''; }
+	})();
+
+	if (!apiKey) return null;
+
+	try {
+		const url = `https://pro-api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(coinId)}&vs_currencies=usd`;
+		const res = await fetch(url, {
+			headers: {'x-cg-pro-api-key': apiKey}
+		});
+		if (!res.ok) return null;
+		const data = await res.json();
+		const price = data?.[coinId]?.usd;
+		return typeof price === 'number' && price > 0 ? price : null;
+	} catch(e){
+		console.error('Live price fetch failed', e);
+		return null;
+	}
+}
+
 function renderCryptoChart(rows){
 	const labels = rows.slice(1).map(r=>`P${r[0]}`);
 	const value = rows.slice(1).map(r=>r[7]);
@@ -810,23 +917,56 @@ function renderCryptoChart(rows){
 		}
 	});
 }
-function runCrypto(){
-	const cAmt = +document.getElementById('cAmt').value||0;
-	const freq = +document.getElementById('cFreq').value||26;
-	const years= +document.getElementById('cYears').value||5;
-	const fee  = +document.getElementById('cFee').value||0;
-	const series = parseSeries(document.getElementById('cSeries').value);
-	const st = document.getElementById('statusCrypto');
-	if (cAmt<=0 || years<=0){ st.textContent='Enter valid inputs'; return; }
+
+async function runCrypto(){
+	const amt   = +document.getElementById('cAmt').value||0;
+	const freq  = +document.getElementById('cFreq').value||26;
+	const years = +document.getElementById('cYears').value||5;
+	const fee   = +document.getElementById('cFee').value||0;
+	const mode  = document.getElementById('cMode').value;
+	const coinId= document.getElementById('cCoin').value;
+	const manualPrice = +document.getElementById('cPrice').value || 0;
+	const st    = document.getElementById('statusCrypto');
+
+	if (amt<=0 || years<=0){ st.textContent='Enter valid inputs'; return; }
 	st.textContent = 'Calculating…';
-	const {rows, endValue, mdd} = dca(cAmt, freq, years, fee, series);
+
+	let startPriceSource = 'default for this coin';
+	let startPrice;
+
+	if (manualPrice > 0){
+		startPrice = manualPrice;
+		startPriceSource = 'manual input';
+	} else {
+		startPrice = CRYPTO_DEFAULT_PRICES[coinId] || 100;
+		if (mode === 'live'){
+			const lp = await fetchLivePrice(coinId);
+			if (lp){
+				startPrice = lp;
+				startPriceSource = 'live API (CoinGecko Pro)';
+			} else {
+				startPriceSource = 'default (API unavailable)';
+			}
+		}
+	}
+
+	const lpLabel = document.getElementById('cLivePrice');
+	if (lpLabel){
+		lpLabel.textContent = `Starting price (${startPriceSource}): ${fmt(startPrice)}`;
+	}
+
+	const periods = Math.round(freq*years);
+	const priceSeries = simulateSeriesFrom(startPrice, periods, 0.10, 0.70);
+	const {rows, endValue, mdd} = dcaSingle(amt, freq, years, fee, priceSeries);
 	const last = rows.at(-1);
 	const units = last[5];
 	const avgCost = last[6]/Math.max(1, units);
+
 	document.getElementById('cUnits').textContent = units.toFixed(6);
 	document.getElementById('cAvgCost').textContent = fmt(avgCost);
 	document.getElementById('cEndValue').textContent = fmt(endValue);
 	document.getElementById('cMdd').textContent = (mdd*100).toFixed(1) + '%';
+
 	document.getElementById('exportCrypto').onclick = ()=> FC.downloadCSV('crypto_dca.csv', FC.toCSV(rows));
 	renderCryptoChart(rows);
 	st.textContent = 'Done';
@@ -866,6 +1006,28 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 	// Crypto
 	if (document.getElementById('runCrypto')) document.getElementById('runCrypto').addEventListener('click', runCrypto);
+
+	// Crypto API key wiring
+	const keyInput = document.getElementById('cgApiKey');
+	const saveKeyBtn = document.getElementById('saveCgKey');
+	if (keyInput){
+		try {
+			const saved = localStorage.getItem('futurecalc_cg_key');
+			if (saved) keyInput.value = saved;
+		} catch(e){}
+	}
+	if (saveKeyBtn && keyInput){
+		saveKeyBtn.addEventListener('click', ()=>{
+			try {
+				localStorage.setItem('futurecalc_cg_key', keyInput.value.trim());
+				const st = document.getElementById('statusCrypto');
+				if (st) st.textContent = 'API key saved locally';
+			} catch(e){
+				const st = document.getElementById('statusCrypto');
+				if (st) st.textContent = 'Could not save key';
+			}
+		});
+	}
 });
 	</script>
 </body>
