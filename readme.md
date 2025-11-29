@@ -13,6 +13,7 @@
 [![Last Commit](https://img.shields.io/github/last-commit/MrGuato/futurecalc)]()
 
 **Live Demo:** [FutureCalc.io](<https://mrguato.github.io/futurecalc/>)
+**Report Card:** [Open SSF Report Card](<https://scorecard.dev/viewer/?uri=github.com/MrGuato/futurecalc&sort_by=check-score&sort_direction=desc>)
 
 ---
 
