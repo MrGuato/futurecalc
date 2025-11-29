@@ -1,678 +1,863 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>FutureCalc — Paycheck to Freedom</title>
-<meta name="description" content="FutureCalc helps professionals and millennials split each paycheck, build a 6-month emergency fund, and see long-term compounding." />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>FutureCalc — Paycheck to Freedom</title>
+	<meta name="description" content="FutureCalc helps professionals and millennials split each paycheck, build a 6-month emergency fund, and see long-term compounding." />
 
-<!-- Custom favicon/logo — replace href with your own path -->
-<link rel="icon" type="image/png" href="assets/favicon.png" />
+	<link rel="icon" type="image/png" href="assets/favicon.png" />
+	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<style>
-  :root{
-    /* Light (default) */
-    --bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
-    --accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
-    --blue:#2f6cf6; --blueFill:rgba(47,108,246,.14);
-    --green:#16a34a; --greenFill:rgba(22,163,74,.14);
-    --ok:#58d38a; --attn:#ff8a8a;
-    --inputBg:#ffffff; --surfaceLow:#f4f6fb; --gridSoft:rgba(0,0,0,0.06);
-  }
-  :root[data-theme="light"]{
-    --bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
-    --accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
-    --blue:#2f6cf6; --blueFill:rgba(47,108,246,.14);
-    --green:#16a34a; --greenFill:rgba(22,163,74,.14);
-    --ok:#58d38a; --attn:#ff8a8a;
-    --inputBg:#ffffff; --surfaceLow:#f4f6fb; --gridSoft:rgba(0,0,0,0.06);
-  }
-  :root[data-theme="dark"]{
-    --bg:#0b0f14; --card:#101722; --ink:#e7eef8; --muted:#9fb2cc;
-    --accent:#6ea8ff; --accent2:#58d38a; --line:#1b2432; --chip:#0f1622;
-    --blue:#4da3ff; --blueFill:rgba(77,163,255,.15);
-    --green:#49d17d; --greenFill:rgba(73,209,125,.15);
-    --ok:#58d38a; --attn:#ff8a8a;
-    --inputBg:#0e141d; --surfaceLow:#0e141d; --gridSoft:rgba(255,255,255,0.08);
-  }
+	<style>
+:root{
+	--bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
+	--accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
+	--blue:#2f6cf6; --blueFill:rgba(47,108,246,.14);
+	--green:#16a34a; --greenFill:rgba(22,163,74,.14);
+	--ok:#58d38a; --attn:#ff8a8a;
+	--inputBg:#ffffff; --surfaceLow:#f4f6fb; --gridSoft:rgba(0,0,0,0.06);
+}
+:root[data-theme="light"]{
+	--bg:#f7f8fb; --card:#ffffff; --ink:#0e1621; --muted:#4a5a70;
+	--accent:#2f6cf6; --accent2:#16a34a; --line:#e6eaf2; --chip:#f0f3fa;
+	--blue:#2f6cf6; --blueFill:rgba(47,108,246,.14);
+	--green:#16a34a; --greenFill:rgba(22,163,74,.14);
+	--ok:#58d38a; --attn:#ff8a8a;
+	--inputBg:#ffffff; --surfaceLow:#f4f6fb; --gridSoft:rgba(0,0,0,0.06);
+}
+:root[data-theme="dark"]{
+	--bg:#0b0f14; --card:#101722; --ink:#e7eef8; --muted:#9fb2cc;
+	--accent:#6ea8ff; --accent2:#58d38a; --line:#1b2432; --chip:#0f1622;
+	--blue:#4da3ff; --blueFill:rgba(77,163,255,.15);
+	--green:#49d17d; --greenFill:rgba(73,209,125,.15);
+	--ok:#58d38a; --attn:#ff8a8a;
+	--inputBg:#0e141d; --surfaceLow:#0e141d; --gridSoft:rgba(255,255,255,0.08);
+}
 
-  *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
-  header{padding:28px 18px 8px;text-align:center;position:relative}
-  header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
-  header p{margin:0;color:var(--muted)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
+header{padding:28px 18px 8px;text-align:center;position:relative}
+header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
+header p{margin:0;color:var(--muted)}
 
-  .wrap{max-width:1100px;margin:0 auto;padding:18px}
-  .grid{display:grid;gap:16px;grid-template-columns:1fr}
-  @media(min-width:960px){.grid{grid-template-columns:380px 1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
-  .card h2{margin:0 0 12px;font-size:18px}
-  label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
-  .row{display:flex;gap:10px}.row>*{flex:1}
-  input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--inputBg);color:var(--ink);outline:none}
-  input[type="checkbox"]{width:auto;transform:translateY(2px)}
-  .help{font-size:12px;color:var(--muted);margin-top:4px}
-  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#001428;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
-  .btn.secondary{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
-  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
-  @media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
-  .stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
-  .stat .k{font-size:12px;color:var(--muted)}
-  .stat .v{font-size:18px;margin-top:4px}
-  .right{display:flex;justify-content:space-between;flex-wrap:wrap}
-  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px;color:var(--muted)}
-  .divider{height:1px;background:var(--line);margin:14px 0}
-  .footer{color:var(--muted);font-size:12px;margin-top:10px}
-  .oplist{margin:10px 0 0;padding-left:18px}.oplist li{margin:6px 0}
-  .tag{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-  .chart-box{position:relative;height:200px}
-  .ef-wrap{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
-  .bar{height:10px;background:var(--surfaceLow);border:1px solid var(--line);border-radius:999px;overflow:hidden}
-  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .4s ease}
-  .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
-  .mini .box{background:var(--surfaceLow);border:1px solid var(--line);border-radius:10px;padding:10px}
-  .mini .box .k{font-size:11px;color:var(--muted)}
-  .mini .box .v{font-size:14px;margin-top:2px}
-  .tooltip{cursor:help;border-bottom:1px dotted var(--muted)}
+/* Slightly narrower than full width, percentage based */
+.wrap{
+	max-width: clamp(960px, 92%, 1280px);
+	margin: 0 auto;
+	padding: clamp(12px, 3vw, 28px);
+}
+@media (min-width: 1600px){
+	.wrap{ max-width: clamp(1040px, 88%, 1400px); }
+}
 
-  /* Tiny theme icon button */
-  #themeBtn{
-    position:absolute;top:16px;right:16px;
-    width:34px;height:28px;display:inline-flex;align-items:center;justify-content:center;
-    border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);
-    font-size:14px;cursor:pointer;user-select:none;
-  }
-  #themeBtn:hover{box-shadow:0 0 0 3px var(--chip) inset}
-</style>
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+/* Optional two-column on very wide screens:
+@media (min-width:1400px){.grid{grid-template-columns:1fr 1fr}}
+*/
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{margin:0 0 12px;font-size:18px}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
+.row{display:flex;gap:10px}
+.row > *{flex:1}
+input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--inputBg);color:var(--ink);outline:none}
+input[type="checkbox"]{width:auto;transform:translateY(2px)}
+.help{font-size:12px;color:var(--muted);margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#001428;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
+.btn.secondary{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
+
+/* Stats full width */
+.stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:8px}
+.stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat .v{font-size:18px;margin-top:4px}
+.right{display:flex;justify-content:space-between;flex-wrap:wrap}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+.divider{height:1px;background:var(--line);margin:14px 0}
+.footer{color:var(--muted);font-size:12px;margin-top:10px}
+.oplist{margin:10px 0 0;padding-left:18px}.oplist li{margin:6px 0}
+.tag{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+
+/* Bigger responsive charts */
+.chart-box{position:relative;height:clamp(260px,40vh,560px)}
+
+.ef-wrap{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
+.bar{height:10px;background:var(--surfaceLow);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.bar > span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .4s ease}
+
+.mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
+.mini .box{background:var(--surfaceLow);border:1px solid var(--line);border-radius:10px;padding:10px}
+.mini .box .k{font-size:11px;color:var(--muted)}
+.mini .box .v{font-size:14px;margin-top:2px}
+.tooltip{cursor:help;border-bottom:1px dotted var(--muted)}
+
+/* Theme button */
+#themeBtn{position:absolute;top:16px;right:16px;width:34px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;cursor:pointer;user-select:none}
+#themeBtn:hover{box-shadow:0 0 0 3px var(--chip) inset}
+
+/* Segmented control + section visibility */
+.seg{appearance:none;border:0;margin:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+.seg.active{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line) inset}
+.calc-sec{display:none}
+.calc-sec.active{display:block}
+
+/* Edge-to-edge feel on small screens */
+@media (max-width:480px){.wrap{padding-left:8px;padding-right:8px}.card{border-radius:12px}}
+	</style>
 </head>
 <body>
-<header>
-  <h1>FutureCalc</h1>
-  <p>Split your paycheck, build a 6-month emergency fund, and watch compounding work for you.</p>
+	<header>
+		<h1>FutureCalc</h1>
+		<p>Split your paycheck, build a 6-month emergency fund, and watch compounding work for you.</p>
+		<button id="themeBtn" type="button" aria-label="Theme: Auto" title="Theme: Auto">A</button>
+	</header>
 
-  <!-- Theme icon button (Auto → Light → Dark) -->
-  <button id="themeBtn" type="button" aria-label="Theme: Auto" title="Theme: Auto">A</button>
-</header>
+	<div style="margin-top:10px;display:flex;justify-content:center">
+		<div id="nav" role="tablist" aria-label="Calculators" style="display:inline-flex;background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:4px">
+			<button class="seg active" role="tab" aria-selected="true" data-target="sec-paycheck">Paycheck</button>
+			<button class="seg" role="tab" aria-selected="false" data-target="sec-debt">Debt</button>
+			<button class="seg" role="tab" aria-selected="false" data-target="sec-mortgage">Mortgage</button>
+			<button class="seg" role="tab" aria-selected="false" data-target="sec-crypto">Crypto</button>
+		</div>
+	</div>
 
-<div class="wrap">
-  <div class="grid">
-    <!-- Inputs -->
-    <section class="card" id="inputs">
-      <h2>1) Your Inputs</h2>
+	<div class="wrap">
+		<div class="grid">
 
-      <label>Gross paycheck amount (before taxes)</label>
-      <input id="gross" type="number" min="0" step="0.01" placeholder="e.g., 2,000" />
+			<!-- Paycheck -->
+			<section id="sec-paycheck" class="calc-sec active">
+				<section class="card" id="inputs">
+					<h2>1) Your Inputs</h2>
 
-      <div class="row">
-        <div>
-          <label>Pay frequency</label>
-          <select id="frequency">
-            <option value="52">Weekly (52/yr)</option>
-            <option value="26" selected>Bi-weekly (26/yr)</option>
-            <option value="24">Semi-monthly (24/yr)</option>
-            <option value="12">Monthly (12/yr)</option>
-          </select>
-        </div>
-        <div>
-          <label>Projection length (years)</label>
-          <input id="years" type="number" min="1" max="60" value="30" />
-        </div>
-      </div>
+					<label>Gross paycheck amount (before taxes)</label>
+					<input id="gross" type="number" min="0" step="0.01" placeholder="e.g., 2,000" />
 
-      <div class="row">
-        <div>
-          <label>Investing — % of each paycheck</label>
-          <input id="investPct" type="number" min="0" max="100" step="0.1" value="15" />
-          <input id="investSlider" type="range" min="0" max="100" step="1" value="15" />
-          <div class="help">Long-term (e.g., index funds).</div>
-        </div>
-        <div>
-          <label>Savings — % of each paycheck</label>
-          <input id="savePct" type="number" min="0" max="100" step="0.1" value="10" />
-          <input id="saveSlider" type="range" min="0" max="100" step="1" value="10" />
-          <div class="help">Cash for emergencies.</div>
-        </div>
-      </div>
+					<div class="row">
+						<div>
+							<label>Pay frequency</label>
+							<select id="frequency">
+								<option value="52">Weekly (52/yr)</option>
+								<option value="26" selected>Bi-weekly (26/yr)</option>
+								<option value="24">Semi-monthly (24/yr)</option>
+								<option value="12">Monthly (12/yr)</option>
+							</select>
+						</div>
+						<div>
+							<label>Projection length (years)</label>
+							<input id="years" type="number" min="1" max="60" value="30" />
+						</div>
+					</div>
 
-      <div class="row">
-        <div>
-          <label>Expected annual return (investing)</label>
-          <input id="annualReturn" type="number" min="0" max="20" step="0.1" value="9" />
-        </div>
-        <div>
-          <label>Savings APY</label>
-          <input id="savingsApy" type="number" min="0" max="10" step="0.1" value="0.5" />
-        </div>
-      </div>
+					<div class="row">
+						<div>
+							<label>Investing — % of each paycheck</label>
+							<input id="investPct" type="number" min="0" max="100" step="0.1" value="15" />
+							<input id="investSlider" type="range" min="0" max="100" step="1" value="15" />
+							<div class="help">Long-term (e.g., index funds).</div>
+						</div>
+						<div>
+							<label>Savings — % of each paycheck</label>
+							<input id="savePct" type="number" min="0" max="100" step="0.1" value="10" />
+							<input id="saveSlider" type="range" min="0" max="100" step="1" value="10" />
+							<div class="help">Cash for emergencies.</div>
+						</div>
+					</div>
 
-      <div class="row">
-        <div>
-          <label>Your average monthly living expenses</label>
-          <input id="monthlyExpenses" type="number" min="0" step="1" placeholder="e.g., 2,500" />
-        </div>
-        <div>
-          <label>Emergency fund target</label>
-          <div style="display:flex;gap:8px;align-items:center"><span class="pill">6 × monthly expenses</span></div>
-        </div>
-      </div>
+					<div class="row">
+						<div>
+							<label>Expected annual return (investing)</label>
+							<input id="annualReturn" type="number" min="0" max="20" step="0.1" value="9" />
+						</div>
+						<div>
+							<label>Savings APY</label>
+							<input id="savingsApy" type="number" min="0" max="10" step="0.1" value="0.5" />
+						</div>
+					</div>
 
-      <div class="divider"></div>
+					<div class="row">
+						<div>
+							<label>Your average monthly living expenses</label>
+							<input id="monthlyExpenses" type="number" min="0" step="1" placeholder="e.g., 2,500" />
+						</div>
+						<div>
+							<label>Emergency fund target</label>
+							<div style="display:flex;gap:8px;align-items:center"><span class="pill">6 × monthly expenses</span></div>
+						</div>
+					</div>
 
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <input id="redirect" type="checkbox" checked />
-        <label for="redirect">After EF is full, redirect the Savings % to Investing</label>
-      </div>
+					<div class="divider"></div>
 
-      <div class="divider"></div>
+					<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+						<input id="redirect" type="checkbox" checked />
+						<label for="redirect">After EF is full, redirect the Savings % to Investing</label>
+					</div>
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" id="run">Calculate</button>
-        <button class="btn secondary" id="reset">Reset</button>
-        <span class="tag" id="status">Ready</span>
-      </div>
-    </section>
+					<div class="divider"></div>
 
-    <!-- Results -->
-    <section class="card">
-      <h2>2) Results & Insights</h2>
+					<div style="display:flex;gap:8px;flex-wrap:wrap">
+						<button class="btn" id="run" type="button">Calculate</button>
+						<button class="btn secondary" id="reset" type="button">Reset</button>
+						<span class="tag" id="status" role="status" aria-live="polite">Ready</span>
+					</div>
+				</section>
 
-      <div class="stats">
-        <div class="stat"><div class="k">Investing total (end)</div><div class="v" id="investTotal">$0</div></div>
-        <div class="stat"><div class="k">Savings balance (end)</div><div class="v" id="saveTotal">$0</div></div>
-        <div class="stat"><div class="k">Emergency fund goal</div><div class="v" id="efGoal">$0</div></div>
-        <div class="stat"><div class="k">Time to reach EF</div><div class="v" id="timeToEF">—</div></div>
-      </div>
+				<section class="card">
+					<h2>2) Results & Insights</h2>
 
-      <div class="ef-wrap">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <div><strong>Emergency Fund Progress</strong></div>
-          <div class="mini">
-            <div class="box"><div class="k">Current</div><div class="v" id="efNow">$0</div></div>
-            <div class="box"><div class="k">Goal</div><div class="v" id="efGoalMini">$0</div></div>
-          </div>
-        </div>
-        <div class="bar" aria-label="Emergency Fund progress"><span id="efBar"></span></div>
-      </div>
+					<div class="stats">
+						<div class="stat"><div class="k">Investing total (end)</div><div class="v" id="investTotal">$0</div></div>
+						<div class="stat"><div class="k">Savings balance (end)</div><div class="v" id="saveTotal">$0</div></div>
+						<div class="stat"><div class="k">Emergency fund goal</div><div class="v" id="efGoal">$0</div></div>
+						<div class="stat"><div class="k">Time to reach EF</div><div class="v" id="timeToEF">—</div></div>
+					</div>
 
-      <div class="divider"></div>
+					<div class="ef-wrap">
+						<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+							<div><strong>Emergency Fund Progress</strong></div>
+							<div class="mini">
+								<div class="box"><div class="k">Current</div><div class="v" id="efNow">$0</div></div>
+								<div class="box"><div class="k">Goal</div><div class="v" id="efGoalMini">$0</div></div>
+							</div>
+						</div>
+						<div class="bar" aria-label="Emergency Fund progress"><span id="efBar"></span></div>
+					</div>
 
-      <div class="mini">
-        <div class="box"><div class="k">Investing: Contributions</div><div class="v" id="invContrib">$0</div></div>
-        <div class="box"><div class="k">Investing: Growth</div><div class="v" id="invGrowth">$0</div></div>
-        <div class="box"><div class="k">Savings: Contributions</div><div class="v" id="savContrib">$0</div></div>
-        <div class="box"><div class="k">Savings: Interest</div><div class="v" id="savGrowth">$0</div></div>
-      </div>
+					<div class="divider"></div>
 
-      <div class="divider"></div>
+					<div class="mini">
+						<div class="box"><div class="k">Investing: Contributions</div><div class="v" id="invContrib">$0</div></div>
+						<div class="box"><div class="k">Investing: Growth</div><div class="v" id="invGrowth">$0</div></div>
+						<div class="box"><div class="k">Savings: Contributions</div><div class="v" id="savContrib">$0</div></div>
+						<div class="box"><div class="k">Savings: Interest</div><div class="v" id="savGrowth">$0</div></div>
+					</div>
 
-      <div class="right">
-        <div class="pill">Order of Operations</div>
-        <div class="pill">Assumes consistent contributions & returns</div>
-      </div>
+					<div class="divider"></div>
 
-      <ol class="oplist" id="ops">
-        <li><strong>Build your emergency fund</strong> to <span id="efExplain">6 months of expenses</span>.</li>
-        <li><strong>Invest</strong> <span id="investExplain">15%</span> of each paycheck.</li>
-        <li><strong>After your emergency fund is full</strong>, <span id="redirExplain">redirect the Savings % to Investing</span>.</li>
-      </ol>
+					<div class="right">
+						<div class="pill">Order of Operations</div>
+						<div class="pill">Assumes consistent contributions & returns</div>
+					</div>
 
-      <div class="divider"></div>
+					<ol class="oplist" id="ops">
+						<li><strong>Build your emergency fund</strong> to <span id="efExplain">6 months of expenses</span>.</li>
+						<li><strong>Invest</strong> <span id="investExplain">15%</span> of each paycheck.</li>
+						<li><strong>After your emergency fund is full</strong>, <span id="redirExplain">redirect the Savings % to Investing</span>.</li>
+					</ol>
 
-      <div class="chart-box">
-        <canvas id="chart"></canvas>
-      </div>
+					<div class="divider"></div>
+					<div class="chart-box"><canvas id="chart"></canvas></div>
+					<div class="divider"></div>
 
-      <div class="divider"></div>
+					<div class="mini">
+						<div class="box"><div class="k">Milestone</div><div class="v" id="mileEF">EF: —</div></div>
+						<div class="box"><div class="k">$100k invested</div><div class="v" id="mile100k">—</div></div>
+						<div class="box"><div class="k">$250k invested</div><div class="v" id="mile250k">—</div></div>
+						<div class="box"><div class="k">$500k invested</div><div class="v" id="mile500k">—</div></div>
+					</div>
+				</section>
+			</section>
 
-      <div class="mini">
-        <div class="box"><div class="k">Milestone</div><div class="v" id="mileEF">EF: —</div></div>
-        <div class="box"><div class="k">$100k invested</div><div class="v" id="mile100k">—</div></div>
-        <div class="box"><div class="k">$250k invested</div><div class="v" id="mile250k">—</div></div>
-        <div class="box"><div class="k">$500k invested</div><div class="v" id="mile500k">—</div></div>
-      </div>
+			<!-- Debt -->
+			<section id="sec-debt" class="calc-sec">
+				<section class="card">
+					<h2>Debt Payoff</h2>
+					<div class="help">Enter one or more debts. Strategy defaults to Avalanche.</div>
 
-      <p class="footer">
-        <strong>What is "6 months of living expenses"?</strong> Add your monthly essentials and multiply by six. That total is your emergency fund goal.
-      </p>
-      <p class="footer">
-        Educational tool only. Returns aren't guaranteed; personal situations vary.
-      </p>
-    </section>
-  </div>
-</div>
+					<div id="debts"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
-<script>
-  // ============== Helpers ==============
-  const $ = (id)=>document.getElementById(id);
-  const setStatus = (msg)=>{ const s=$('status'); if(s) s.textContent=msg; };
-  const fmt = (n)=> n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
-  const monthsWords = (p)=>{
-    const y=Math.floor(p/12), m=p%12;
-    if (p===Infinity) return 'Not reached';
-    if (y===0) return `${m} month${m!==1?'s':''}`;
-    if (m===0) return `${y} year${y!==1?'s':''}`;
-    return `${y}y ${m}m`;
-  };
-  
-  // Fixed getVar function with better error handling
-  const getVar=(name)=> {
-    try {
-      const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      return value || (name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc');
-    } catch(e) {
-      console.warn('Error getting CSS variable:', name, e);
-      return name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc';
-    }
-  };
+					<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+						<button type="button" class="btn secondary" id="addDebt">Add debt</button>
+						<select id="strategy" aria-label="Strategy">
+							<option value="avalanche" selected>Avalanche (highest APR first)</option>
+							<option value="snowball">Snowball (smallest balance first)</option>
+						</select>
+						<label style="display:inline-flex;align-items:center;gap:8px">
+							<span>Extra monthly</span>
+							<input id="extraPay" type="number" min="0" step="1" value="0" style="width:120px"/>
+						</label>
+						<button type="button" class="btn" id="runDebt">Calculate</button>
+						<button type="button" class="btn secondary" id="exportDebt">Export CSV</button>
+						<span class="tag" id="statusDebt" role="status" aria-live="polite">Ready</span>
+					</div>
+				</section>
 
-  // Chart variable - initialize as null
-  let chart = null;
-  let DOM_READY = false;
+				<section class="card">
+					<h2>Summary</h2>
+					<div class="stats">
+						<div class="stat"><div class="k">Time to payoff</div><div class="v" id="debtTime">—</div></div>
+						<div class="stat"><div class="k">Total interest</div><div class="v" id="debtInterest">$0</div></div>
+						<div class="stat"><div class="k">Total paid</div><div class="v" id="debtTotal">—</div></div>
+						<div class="stat"><div class="k">Strategy</div><div class="v" id="debtStrat">Avalanche</div></div>
+					</div>
+					<div class="divider"></div>
+					<div class="chart-box"><canvas id="debtChart"></canvas></div>
+					<div class="divider"></div>
+					<div class="mini" id="debtMilestones"></div>
+				</section>
+			</section>
 
-  // ============== Theme handling (icon button cycles Auto → Light → Dark) ==============
-  const THEME_KEY = 'futurecalc_theme';
-  const themeModes = ['auto','light','dark'];
-  const themeIcons = { auto:'A', light:'☀️', dark:'🌙' };
-  const themeLabels = { auto:'Theme: Auto', light:'Theme: Light', dark:'Theme: Dark' };
+			<!-- Mortgage -->
+			<section id="sec-mortgage" class="calc-sec">
+				<section class="card">
+					<h2>Mortgage</h2>
+					<div class="row">
+						<div><label>Home price</label><input id="mPrice" type="number" min="0" step="1000" value="400000"/></div>
+						<div><label>Down payment</label><input id="mDown" type="number" min="0" step="1000" value="80000"/></div>
+					</div>
+					<div class="row">
+						<div><label>Rate (APR %)</label><input id="mRate" type="number" min="0" step="0.01" value="6.5"/></div>
+						<div><label>Term (years)</label><input id="mYears" type="number" min="1" max="40" value="30"/></div>
+					</div>
+					<div class="row">
+						<div><label>Extra monthly</label><input id="mExtra" type="number" min="0" step="1" value="0"/></div>
+						<div><label>Property tax + Insurance (monthly)</label><input id="mTI" type="number" min="0" step="1" value="0"/></div>
+					</div>
+					<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+						<button type="button" class="btn" id="runMortgage">Calculate</button>
+						<button type="button" class="btn secondary" id="exportMortgage">Export CSV</button>
+						<span class="tag" id="statusMortgage" role="status" aria-live="polite">Ready</span>
+					</div>
+				</section>
 
-  function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
-  
-  function applyTheme(mode){
-    const root = document.documentElement;
-    root.setAttribute('data-theme', mode === 'auto' ? (systemPrefersDark() ? 'dark' : 'light') : mode);
-    localStorage.setItem(THEME_KEY, mode);
-    const btn = $('themeBtn');
-    if (btn){ 
-      btn.textContent = themeIcons[mode]; 
-      btn.setAttribute('aria-label', themeLabels[mode]); 
-      btn.title = themeLabels[mode]; 
-    }
-    
-    // Only re-render chart if DOM is ready, canvas exists, and we have a chart
-    if (DOM_READY && $('chart') && chart) {
-      try { 
-        const results = calculate();
-        if (results) {
-          render(results); 
-        }
-      } catch(e){ 
-        console.error('Theme change chart re-render failed:', e); 
-      }
-    }
-  }
-  
-  function initTheme(){
-    const saved = localStorage.getItem(THEME_KEY) || 'auto';
-    applyTheme(saved);
-    if (window.matchMedia) {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{
-        const current = localStorage.getItem(THEME_KEY) || 'auto';
-        if (current === 'auto') applyTheme('auto');
-      });
-    }
-  }
-  
-  function cycleTheme(){
-    const current = localStorage.getItem(THEME_KEY) || 'auto';
-    const idx = themeModes.indexOf(current);
-    const next = themeModes[(idx+1)%themeModes.length];
-    applyTheme(next);
-  }
+				<section class="card">
+					<h2>Summary</h2>
+					<div class="stats">
+						<div class="stat"><div class="k">Principal</div><div class="v" id="mPrincipal">$0</div></div>
+						<div class="stat"><div class="k">Monthly P&I</div><div class="v" id="mPI">$0</div></div>
+						<div class="stat"><div class="k">Total interest</div><div class="v" id="mInterest">$0</div></div>
+						<div class="stat"><div class="k">Time to payoff</div><div class="v" id="mTime">—</div></div>
+					</div>
+					<div class="divider"></div>
+					<div class="chart-box"><canvas id="mortgageChart"></canvas></div>
+					<div class="divider"></div>
+					<div class="mini" id="mNotes"></div>
+				</section>
+			</section>
 
-  // ============== Core math ==============
-  function calculate(){
-    // Check if Chart.js loaded
-    if (!window.Chart){ 
-      setStatus('Chart library not loaded');
-      return null; 
-    }
+			<!-- Crypto -->
+			<section id="sec-crypto" class="calc-sec">
+				<section class="card">
+					<h2>Crypto DCA</h2>
+					<div class="row">
+						<div><label>Contribution (per period)</label><input id="cAmt" type="number" min="0" step="1" value="200"/></div>
+						<div><label>Frequency</label>
+							<select id="cFreq">
+								<option value="12">Monthly</option>
+								<option value="26" selected>Bi-weekly</option>
+								<option value="52">Weekly</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div><label>Years</label><input id="cYears" type="number" min="1" max="30" value="5"/></div>
+						<div><label>Fee per trade (%)</label><input id="cFee" type="number" min="0" step="0.01" value="0.2"/></div>
+					</div>
+					<div class="help">Paste or simulate price series. If left blank, a log-normal path is simulated with annualized 60% volatility and 10% drift (illustrative).</div>
+					<label>Price series (CSV of prices per period, optional)</label>
+					<textarea id="cSeries" rows="4"></textarea>
+					<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+						<button type="button" class="btn" id="runCrypto">Calculate</button>
+						<button type="button" class="btn secondary" id="exportCrypto">Export CSV</button>
+						<span class="tag" id="statusCrypto" role="status" aria-live="polite">Ready</span>
+					</div>
+				</section>
 
-    const gross=+($('gross')?.value||0);
-    const periodsPerYear=+($('frequency')?.value||26);
-    const years=+($('years')?.value||30);
-    const investPct=Math.min(100,Math.max(0,+($('investPct')?.value||0)))/100;
-    const savePct=Math.min(100,Math.max(0,+($('savePct')?.value||0)))/100;
-    const annualReturn=Math.max(0,+($('annualReturn')?.value||0))/100;
-    const savingsApy=Math.max(0,+($('savingsApy')?.value||0))/100;
-    const monthlyExpenses=+($('monthlyExpenses')?.value||0);
-    const redirect=$('redirect')?.checked ?? true;
+				<section class="card">
+					<h2>Summary</h2>
+					<div class="stats">
+						<div class="stat"><div class="k">Units accumulated</div><div class="v" id="cUnits">0</div></div>
+						<div class="stat"><div class="k">Average cost</div><div class="v" id="cAvgCost">$0</div></div>
+						<div class="stat"><div class="k">Ending value</div><div class="v" id="cEndValue">$0</div></div>
+						<div class="stat"><div class="k">Max drawdown</div><div class="v" id="cMdd">—</div></div>
+					</div>
+					<div class="divider"></div>
+					<div class="chart-box"><canvas id="cryptoChart"></canvas></div>
+				</section>
+			</section>
 
-    setStatus('Calculating…');
-    
-    // Better validation
-    if (!gross || gross <= 0) {
-      setStatus('Enter a valid paycheck amount');
-      return null;
-    }
-    
-    if (!(investPct+savePct) || (investPct+savePct) <= 0) {
-      setStatus('Enter investment or savings percentages');
-      return null;
-    }
-    
-    if (!years || years <= 0) {
-      setStatus('Enter valid projection years');
-      return null;
-    }
+		</div>
+	</div>
 
-    const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
-    const totalP = years*periodsPerYear;
-    const rI = Math.pow(1+annualReturn,1/periodsPerYear)-1;
-    const rS = Math.pow(1+savingsApy,1/periodsPerYear)-1;
+	<!-- Chart.js (CDN) -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 
-    let inv=0, sav=0, efAt=Infinity;
-    let invContrib=0, invGrowth=0;
-    let savContrib=0, savGrowth=0;
+	<script>
+/* ========= Helpers ========= */
+const $ = (id)=>document.getElementById(id);
+const setStatus = (msg)=>{ const s=$('status'); if(s) s.textContent=msg; };
+const fmt = (n)=> (isFinite(n)? n:0).toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+const monthsWords = (p)=>{
+	if (p===Infinity) return 'Not reached';
+	const y=Math.floor(p/12), m=p%12;
+	if (y===0) return `${m} month${m!==1?'s':''}`;
+	if (m===0) return `${y} year${y!==1?'s':''}`;
+	return `${y}y ${m}m`;
+};
+const getVar=(name)=> {
+	try {
+		const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+		if (value) return value;
+	} catch(e) {}
+	return name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc';
+};
 
-    const invP=[], savP=[];
-    const investMilestones = { '100000': Infinity, '250000': Infinity, '500000': Infinity };
+let chart = null, debtChart = null, mortgageChart = null, cryptoChart = null;
+let DOM_READY = false;
 
-    for(let p=0;p<=totalP;p++){
-      invP.push(inv); savP.push(sav);
-      if(p===totalP) break;
+/* ========= Theme handling ========= */
+const THEME_KEY = 'futurecalc_theme';
+const themeModes = ['auto','light','dark'];
+const themeIcons = { auto:'A', light:'☀️', dark:'🌙' };
+const themeLabels = { auto:'Theme: Auto', light:'Theme: Light', dark:'Theme: Dark' };
 
-      let cI=investPct*gross, cS=savePct*gross;
+function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+function applyTheme(mode){
+	const root = document.documentElement;
+	root.setAttribute('data-theme', mode === 'auto' ? (systemPrefersDark() ? 'dark' : 'light') : mode);
+	try { localStorage.setItem(THEME_KEY, mode); } catch {}
+	const btn = $('themeBtn');
+	if (btn){ btn.textContent = themeIcons[mode]; btn.setAttribute('aria-label', themeLabels[mode]); btn.title = themeLabels[mode]; }
+	// Re-paint charts with new colors if present
+	const repaint = (cht)=>{
+		if (!cht) return;
+		cht.options.plugins.legend.labels.color = getVar('--muted');
+		cht.options.scales.x.ticks.color = getVar('--muted');
+		cht.options.scales.x.grid.color = getVar('--gridSoft');
+		cht.options.scales.y.ticks.color = getVar('--muted');
+		cht.options.scales.y.grid.color = getVar('--gridSoft');
+		cht.update('none');
+	};
+	if (DOM_READY && window.Chart){
+		repaint(chart); repaint(debtChart); repaint(mortgageChart); repaint(cryptoChart);
+	}
+}
+function initTheme(){
+	let saved = 'auto';
+	try { saved = localStorage.getItem(THEME_KEY) || 'auto'; } catch {}
+	applyTheme(saved);
+	if (window.matchMedia) {
+		const mq = window.matchMedia('(prefers-color-scheme: dark)');
+		if (mq.addEventListener) mq.addEventListener('change', ()=>{ const current=(localStorage.getItem(THEME_KEY)||'auto'); if (current==='auto') applyTheme('auto'); });
+		else if (mq.addListener) mq.addListener(()=>{ const current=(localStorage.getItem(THEME_KEY)||'auto'); if (current==='auto') applyTheme('auto'); });
+	}
+}
+function cycleTheme(){
+	const current = (localStorage.getItem(THEME_KEY) || 'auto');
+	const idx = themeModes.indexOf(current);
+	const next = themeModes[(idx+1)%themeModes.length];
+	applyTheme(next);
+}
 
-      // EF stop/redirect
-      if(efGoal>0 && sav>=efGoal-0.005){
-        if(efAt===Infinity) efAt=p;
-        cS=0; if(redirect) cI+=savePct*gross;
-      }
+/* ========= Paycheck ========= */
+function calculate(){
+	const gross=+($('gross')?.value||0);
+	const periodsPerYear=+($('frequency')?.value||26);
+	const years=+($('years')?.value||30);
+	const investPct=Math.min(100,Math.max(0,+($('investPct')?.value||0)))/100;
+	const savePct=Math.min(100,Math.max(0,+($('savePct')?.value||0)))/100;
+	const annualReturn=Math.max(0,+($('annualReturn')?.value||0))/100;
+	const savingsApy=Math.max(0,+($('savingsApy')?.value||0))/100;
+	const monthlyExpenses=+($('monthlyExpenses')?.value||0);
+	const redirect=$('redirect')?.checked ?? true;
 
-      // Growth this period (before contributions)
-      const gI = inv * rI;
-      const gS = sav * rS;
+	setStatus('Calculating…');
+	if (!gross || gross <= 0) { setStatus('Enter a valid paycheck amount'); return null; }
+	if (!((investPct+savePct) > 0)) { setStatus('Enter investment or savings percentages'); return null; }
+	if (!years || years <= 0) { setStatus('Enter valid projection years'); return null; }
 
-      // Update balances
-      inv = inv + gI + cI;
-      sav = (efGoal>0) ? Math.min(efGoal, sav + gS + cS) : sav + gS + cS;
+	const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
+	const totalP = Math.round(years*periodsPerYear);
+	const rI = Math.pow(1+annualReturn,1/periodsPerYear)-1;
+	const rS = Math.pow(1+savingsApy,1/periodsPerYear)-1;
 
-      // Sums
-      invContrib += cI;
-      invGrowth  += gI;
+	let inv=0, sav=0, efAt=Infinity;
+	let invContrib=0, invGrowth=0;
+	let savContrib=0, savGrowth=0;
 
-      // realized savings interest (don't overcount if at cap)
-      const realizedS = (efGoal>0)
-        ? Math.max(0, Math.min(efGoal, sav) - Math.min(efGoal, sav - gS - cS) - cS)
-        : gS;
-      savContrib += cS;
-      savGrowth  += realizedS;
+	const invP=[], savP=[];
+	const investMilestones = { '100000': Infinity, '250000': Infinity, '500000': Infinity };
 
-      // milestones
-      const after = inv;
-      for (const k of Object.keys(investMilestones)){
-        if (investMilestones[k]===Infinity && after >= +k) investMilestones[k]=p;
-      }
-    }
+	for(let p=0;p<=totalP;p++){
+		invP.push(inv); savP.push(sav);
+		if(p===totalP) break;
 
-    return {
-      inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years,
-      invContrib, invGrowth, savContrib, savGrowth, investMilestones
-    };
-  }
+		let cI=investPct*gross, cS=savePct*gross;
 
-  // ============== Render ==============
-  const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
+		if(efGoal>0 && sav>=efGoal-0.005){
+			if(efAt===Infinity) efAt=p;
+			cS=0; if(redirect) cI+=savePct*gross;
+		}
 
-  function render(res){
-    if(!res){ 
-      setStatus('No results to render');
-      return; 
-    }
-    
-    setStatus('Rendering…');
+		const gI = inv * rI;
+		const gS = sav * rS;
 
-    try {
-      // Totals
-      $('investTotal').textContent=fmt(res.inv);
-      $('saveTotal').textContent=fmt(res.sav);
-      $('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
-      $('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
+		inv = inv + gI + cI;
+		sav = (efGoal>0) ? Math.min(efGoal, sav + gS + cS) : sav + gS + cS;
 
-      // EF progress
-      $('efNow').textContent=fmt(res.sav);
-      $('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
-      const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
-      $('efBar').style.width = pct + '%';
+		invContrib += cI;
+		invGrowth  += gI;
 
-      // Contributions vs growth
-      $('invContrib').textContent = fmt(res.invContrib);
-      $('invGrowth').textContent  = fmt(Math.max(0, res.inv - res.invContrib));
-      $('savContrib').textContent = fmt(res.savContrib);
-      $('savGrowth').textContent  = fmt(res.savGrowth);
+		const realizedS = (efGoal>0)
+			? Math.max(0, Math.min(efGoal, sav) - Math.min(efGoal, sav - gS - cS) - cS)
+			: gS;
+		savContrib += cS;
+		savGrowth  += realizedS;
 
-      // copy text updates
-      $('efExplain').textContent='6 months of your essential monthly expenses';
-      $('investExplain').textContent=`${$('investPct').value}%`;
-      $('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
+		const after = inv;
+		for (const k of Object.keys(investMilestones)){
+			if (investMilestones[k]===Infinity && after >= +k) investMilestones[k]=p;
+		}
+	}
 
-      // Update milestones
-      const periodsToTime = (p) => p === Infinity ? '—' : monthsWords(Math.round(p*12/res.periodsPerYear));
-      $('mileEF').textContent = res.efAt === Infinity ? 'EF: Not reached' : `EF: ${periodsToTime(res.efAt)}`;
-      $('mile100k').textContent = periodsToTime(res.investMilestones['100000']);
-      $('mile250k').textContent = periodsToTime(res.investMilestones['250000']);
-      $('mile500k').textContent = periodsToTime(res.investMilestones['500000']);
+	return {inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years, invContrib, invGrowth, savContrib, savGrowth, investMilestones};
+}
+const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
 
-      // yearly downsample
-      const invY=[], savY=[];
-      for(let y=0;y<=res.years;y++){ 
-        const i=y*res.periodsPerYear; 
-        invY.push(res.invP[i] || 0); 
-        savY.push(res.savP[i] || 0); 
-      }
+function render(res){
+	if(!res){ setStatus('No results to render'); return; }
+	setStatus('Rendering…');
+	try {
+		$('investTotal').textContent=fmt(res.inv);
+		$('saveTotal').textContent=fmt(res.sav);
+		$('efGoal').textContent=res.efGoal>0?fmt(res.efGoal):'Not set';
+		$('timeToEF').textContent=(res.efGoal>0)?(res.efAt===Infinity?'Not reached':monthsWords(Math.round(res.efAt*12/res.periodsPerYear))):'—';
 
-      // Chart rendering with better error handling
-      const canvas = $('chart');
-      if (!canvas){
-        setStatus('Canvas not found');
-        console.error('Canvas #chart missing in DOM.');
-        return;
-      }
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx){
-        setStatus('Canvas context failed');
-        console.error('getContext("2d") returned null');
-        return;
-      }
+		$('efNow').textContent=fmt(res.sav);
+		$('efGoalMini').textContent=res.efGoal>0?fmt(res.efGoal):'—';
+		const pct = (res.efGoal>0)? Math.min(100, Math.round((res.sav/res.efGoal)*100)) : 0;
+		$('efBar').style.width = pct + '%';
 
-      // Destroy existing chart
-      if(chart) {
-        try {
-          chart.destroy();
-        } catch(e) {
-          console.warn('Chart destroy failed:', e);
-        }
-        chart = null;
-      }
+		$('invContrib').textContent = fmt(res.invContrib);
+		$('invGrowth').textContent  = fmt(res.invGrowth);
+		$('savContrib').textContent = fmt(res.savContrib);
+		$('savGrowth').textContent  = fmt(res.savGrowth);
 
-      // Create new chart with error handling
-      try {
-        chart = new Chart(ctx, {
-          type:'line',
-          data:{
-            labels:yearLabels(res.years),
-            datasets:[
-              {
-                label:'Investing balance', 
-                data:invY, 
-                borderColor:getVar('--blue'), 
-                backgroundColor:getVar('--blueFill'), 
-                fill:true, 
-                tension:.2
-              },
-              {
-                label:'Savings balance',   
-                data:savY, 
-                borderColor:getVar('--green'), 
-                backgroundColor:getVar('--greenFill'), 
-                fill:true, 
-                tension:.2
-              }
-            ]
-          },
-          options:{
-            responsive:true, 
-            maintainAspectRatio:false, 
-            interaction:{mode:'index',intersect:false},
-            plugins:{
-              legend:{labels:{color:getVar('--muted')}},
-              tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}
-            },
-            scales:{
-              x:{
-                ticks:{color:getVar('--muted')}, 
-                grid:{color:getVar('--gridSoft')}
-              },
-              y:{
-                ticks:{
-                  color:getVar('--muted'), 
-                  callback:(v)=>'$'+Intl.NumberFormat().format(v)
-                }, 
-                grid:{color:getVar('--gridSoft')}
-              }
-            },
-            elements:{point:{radius:0}}
-          }
-        });
-        setStatus('Done');
-      } catch(e) {
-        console.error('Chart creation failed:', e);
-        setStatus('Chart creation failed');
-        return;
-      }
-      
-    } catch(e) {
-      console.error('Render failed:', e);
-      setStatus('Render failed');
-    }
-  }
+		$('efExplain').textContent='6 months of your essential monthly expenses';
+		$('investExplain').textContent=`${$('investPct').value}%`;
+		$('redirExplain').textContent=$('redirect').checked?'this adds your Savings % to Investing automatically':'you keep your Savings % in cash even after the fund is full';
 
-  // ============== DOM Ready ==============
-  document.addEventListener('DOMContentLoaded', ()=>{
-    DOM_READY = true;
+		const periodsToTime = (p) => p === Infinity ? '—' : monthsWords(Math.round(p*12/res.periodsPerYear));
+		$('mileEF').textContent = res.efAt === Infinity ? 'EF: Not reached' : `EF: ${periodsToTime(res.efAt)}`;
+		$('mile100k').textContent = periodsToTime(res.investMilestones['100000']);
+		$('mile250k').textContent = periodsToTime(res.investMilestones['250000']);
+		$('mile500k').textContent = periodsToTime(res.investMilestones['500000']);
 
-    // Check Chart.js availability
-    if (!window.Chart){
-      setStatus('Chart.js failed to load');
-      console.error('Chart.js not available. Check network connection or ad blockers.');
-      return;
-    }
+		const invY=[], savY=[];
+		for(let y=0;y<=res.years;y++){
+			const i=y*res.periodsPerYear;
+			invY.push(res.invP[i] || 0);
+			savY.push(res.savP[i] || 0);
+		}
 
-    // Theme setup
-    const btn = $('themeBtn');
-    if (btn) btn.addEventListener('click', cycleTheme);
-    initTheme();
+		const canvas = $('chart'); if (!canvas){ setStatus('Canvas not found'); return; }
+		const ctx = canvas.getContext('2d'); if (!ctx){ setStatus('Canvas context failed'); return; }
+		if(chart) { try { chart.destroy(); } catch(e){} chart=null; }
+		if (window.Chart) {
+			chart = new Chart(ctx, {
+				type:'line',
+				data:{ labels:yearLabels(res.years),
+					datasets:[
+						{ label:'Investing balance', data:invY, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2 },
+						{ label:'Savings balance', data:savY, borderColor:getVar('--green'), backgroundColor:getVar('--greenFill'), fill:true, tension:.2 }
+					]},
+				options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+					plugins:{legend:{labels:{color:getVar('--muted')}},tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.parsed.y||0)}`}}},
+					scales:{x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
+					        y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}},
+					elements:{point:{radius:0}}
+				}
+			});
+			setStatus('Done');
+		} else setStatus('Done (no chart)');
+	} catch(e){ console.error('Render failed:', e); setStatus('Render failed'); }
+}
 
-    // Input persistence
-    const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
-    
-    function saveInputs(){
-      try {
-        const d={};
-        fields.forEach(f=>{
-          const el=$(f);
-          if (el) {
-            d[f]=el.type==='checkbox'?el.checked:el.value;
-          }
-        });
-        localStorage.setItem('futurecalc_inputs',JSON.stringify(d));
-      } catch(e) {
-        console.warn('Failed to save inputs:', e);
-      }
-    }
-    
-    function loadInputs(){
-      try {
-        const raw=localStorage.getItem('futurecalc_inputs'); 
-        if(!raw) return; 
-        const d=JSON.parse(raw); 
-        fields.forEach(f=>{
-          if(d[f]!==undefined){
-            const el=$(f); 
-            if (el) {
-              if (el.type==='checkbox') {
-                el.checked=d[f];
-              } else {
-                el.value=d[f];
-              }
-            }
-          }
-        });
-      } catch(e) {
-        console.warn('Failed to load inputs:', e);
-      }
-    }
+/* ========= Nav, utils ========= */
+function initNav(){
+	const tabs = Array.from(document.querySelectorAll('#nav .seg'));
+	const secs = Array.from(document.querySelectorAll('.calc-sec'));
+	function activate(id){
+		secs.forEach(s=>s.classList.toggle('active', s.id===id));
+		tabs.forEach(t=>t.classList.toggle('active', t.dataset.target===id));
+	}
+	tabs.forEach(btn=>btn.addEventListener('click', ()=>activate(btn.dataset.target)));
+}
+const FC = {
+	currency: 'USD',
+	fmt(n){ return (isFinite(n)?n:0).toLocaleString(undefined,{style:'currency',currency:this.currency,maximumFractionDigits:0}); },
+	monthsWords,
+	pmt(principal, rateMonthly, n){ if (rateMonthly===0) return principal/n; const i=rateMonthly,v=Math.pow(1+i,n); return principal*i*v/(v-1); },
+	toCSV(rows){ return rows.map(r=>r.map(v=>typeof v==='number'?v:`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n'); },
+	downloadCSV(filename,csv){ const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); }
+};
 
-    // Set up input event listeners
-    fields.forEach(f=>{
-      const el=$(f); 
-      if(el){ 
-        el.addEventListener('input',saveInputs); 
-        el.addEventListener('change',saveInputs); 
-      }
-    });
-    
-    // Load saved inputs
-    loadInputs();
+/* ========= Debt ========= */
+function addDebtRow(container){
+	const row = document.createElement('div');
+	row.className = 'mini'; row.style.marginTop='8px';
+	row.innerHTML = `
+		<div class="box"><div class="k">Name</div><div class="v"><input type="text" data-k="name" placeholder="e.g., Card A"></div></div>
+		<div class="box"><div class="k">Balance</div><div class="v"><input type="number" min="0" step="1" data-k="bal" value="2000"></div></div>
+		<div class="box"><div class="k">APR %</div><div class="v"><input type="number" min="0" step="0.01" data-k="apr" value="22.9"></div></div>
+		<div class="box"><div class="k">Minimum</div><div class="v"><input type="number" min="0" step="1" data-k="min" value="50"></div></div>
+		<div class="box"><div class="k">Remove</div><div class="v"><button type="button" class="btn secondary" data-k="rm">X</button></div></div>`;
+	container.appendChild(row);
+	row.querySelector('[data-k="rm"]').addEventListener('click', ()=> row.remove());
+}
+function readDebts(){
+	const list=[]; document.querySelectorAll('#debts .mini').forEach(row=>{
+		const q = k => row.querySelector(`[data-k="${k}"]`);
+		const name=q('name')?.value?.trim()||'Debt';
+		const bal=+q('bal')?.value||0;
+		const apr=(+q('apr')?.value||0)/100;
+		const min=+q('min')?.value||0;
+		if (bal>0 && apr>=0 && min>=0) list.push({name,bal,apr,min});
+	}); return list;
+}
+function payoffSchedule(debts, extra, strategy){
+	let ds = debts.map(d=>({...d, bal:+d.bal}));
+	const rows = [['Month','TotalBalance']];
+	let month=0,totalInterest=0;
+	while (ds.some(d=>d.bal>0) && month<3600){
+		month++;
+		ds.forEach(d=>{ const i=d.apr/12; const int=d.bal*i; d.intAcc=(d.intAcc||0)+int; });
+		let budget = ds.reduce((s,d)=>s+Math.min(d.min, d.bal+(d.intAcc||0)),0)+extra;
+		const order=[...ds].filter(d=>d.bal>0).sort((a,b)=> strategy==='snowball'? a.bal-b.bal : b.apr-a.apr);
+		order.forEach(d=>{
+			if (d.bal<=0) return;
+			const iDue=d.intAcc||0, due=d.bal+iDue;
+			let pay=Math.min(d.min, due);
+			if (budget>0){
+				const extraTake=Math.min(Math.max(0,budget-pay), due-pay);
+				if (extraTake>0) pay+=extraTake;
+			}
+			budget-=pay;
+			const iPort=Math.min(iDue,pay), pPort=Math.max(0,pay-iPort);
+			d.intAcc=iDue-iPort; d.bal=Math.max(0,d.bal-pPort);
+			totalInterest+=iPort;
+		});
+		const totBal = ds.reduce((s,d)=>s+d.bal,0);
+		rows.push([month,totBal]);
+		if (order.every(d=>d.bal===0 || d.min===0) && extra===0) break;
+	}
+	return {rows, months:month, totalInterest};
+}
+function renderDebtChart(rows){
+	const labels = rows.slice(1).map(r=>`M${r[0]}`);
+	const balance = rows.slice(1).map(r=>r[1]);
+	const cv = document.getElementById('debtChart'); if(!cv) return;
+	const ctx = cv.getContext('2d'); if(!ctx) return;
+	if (debtChart){ try{debtChart.destroy();}catch(e){} debtChart=null; }
+	debtChart = new Chart(ctx,{
+		type:'line',
+		data:{labels, datasets:[{label:'Total balance', data:balance, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2}]},
+		options:{responsive:true,maintainAspectRatio:false,
+			plugins:{legend:{labels:{color:getVar('--muted')}}},
+			scales:{x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
+			        y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}},
+			elements:{point:{radius:0}}
+		}
+	});
+}
+function runDebt(){
+	const debts = readDebts();
+	const extra = +document.getElementById('extraPay').value || 0;
+	const strategy = document.getElementById('strategy').value;
+	const st = document.getElementById('statusDebt');
+	if (debts.length===0){ st.textContent='Add at least one debt'; return; }
+	st.textContent='Calculating…';
+	const {rows, months, totalInterest} = payoffSchedule(debts, extra, strategy);
+	document.getElementById('debtTime').textContent = FC.monthsWords(months);
+	document.getElementById('debtInterest').textContent = FC.fmt(totalInterest);
+	document.getElementById('debtTotal').textContent = '—';
+	document.getElementById('debtStrat').textContent = strategy==='snowball'?'Snowball':'Avalanche';
+	const box = document.getElementById('debtMilestones'); box.innerHTML='';
+	const div=document.createElement('div'); div.className='box';
+	div.innerHTML = `<div class="k">All debts paid</div><div class="v">${months? 'Month '+months : '—'}</div>`;
+	box.appendChild(div);
+	document.getElementById('exportDebt').onclick = ()=> FC.downloadCSV('debt_summary_balance.csv', FC.toCSV(rows));
+	renderDebtChart(rows);
+	st.textContent='Done';
+}
 
-    // Slider <-> input synchronization
-    function syncPair(numId, sliderId){
-      const num=$(numId), rng=$(sliderId);
-      if (!num || !rng) return;
-      num.addEventListener('input',()=>{rng.value=num.value;});
-      rng.addEventListener('input',()=>{num.value=rng.value;});
-    }
-    syncPair('investPct','investSlider');
-    syncPair('savePct','saveSlider');
+/* ========= Mortgage ========= */
+function mortgageSchedule(P, rate, years, extra){
+	const i = rate/100/12;
+	const n = Math.round(years*12);
+	let M = FC.pmt(P, i, n);
+	let bal = P, month=0, totalInterest=0;
+	const rows = [['Month','Balance']];
+	while (bal > 0 && month < n+120){
+		month++;
+		const interest = bal * i;
+		let pay = Math.min(bal + interest, M + (extra||0));
+		const principal = Math.max(0, pay - interest);
+		bal = Math.max(0, bal - principal);
+		totalInterest += interest;
+		rows.push([month, bal]);
+	}
+	return {rows, months: month, M, totalInterest};
+}
+function renderMortgageChart(rows){
+	const labels = rows.slice(1).map(r=>`M${r[0]}`);
+	const bal = rows.slice(1).map(r=>r[1]);
+	const cv = document.getElementById('mortgageChart'); if(!cv) return;
+	const ctx = cv.getContext('2d'); if(!ctx) return;
+	if (mortgageChart){ try{mortgageChart.destroy();}catch(e){} mortgageChart=null; }
+	mortgageChart = new Chart(ctx,{
+		type:'line',
+		data:{labels, datasets:[{label:'Mortgage balance', data:bal, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2}]},
+		options:{responsive:true,maintainAspectRatio:false,
+			plugins:{legend:{labels:{color:getVar('--muted')}}},
+			scales:{x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
+			        y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}},
+			elements:{point:{radius:0}}
+		}
+	});
+}
+function runMortgage(){
+	const price = +document.getElementById('mPrice').value||0;
+	const down  = +document.getElementById('mDown').value||0;
+	const rate  = +document.getElementById('mRate').value||0;
+	const years = +document.getElementById('mYears').value||30;
+	const extra = +document.getElementById('mExtra').value||0;
+	const ti    = +document.getElementById('mTI').value||0;
+	const st = document.getElementById('statusMortgage');
+	if (price<=0 || rate<0 || years<=0 || down<0){ st.textContent='Enter valid inputs'; return; }
+	const P = Math.max(0, price - down);
+	const {rows, months, M, totalInterest} = mortgageSchedule(P, rate, years, extra);
+	document.getElementById('mPrincipal').textContent = FC.fmt(P);
+	document.getElementById('mPI').textContent = FC.fmt(M + ti);
+	document.getElementById('mInterest').textContent = FC.fmt(totalInterest);
+	document.getElementById('mTime').textContent = FC.monthsWords(months);
+	const notes = document.getElementById('mNotes'); notes.innerHTML='';
+	const pmiDiv = document.createElement('div'); pmiDiv.className='box';
+	let ltvCross = '—';
+	for (let r of rows.slice(1)){ const bal = r[1]; if (bal <= price*0.8){ ltvCross = 'Month '+r[0]; break; } }
+	pmiDiv.innerHTML = `<div class="k">80% LTV reached</div><div class="v">${ltvCross}</div>`;
+	notes.appendChild(pmiDiv);
+	document.getElementById('exportMortgage').onclick = ()=> FC.downloadCSV('mortgage_balance.csv', FC.toCSV(rows));
+	renderMortgageChart(rows);
+	st.textContent='Done';
+}
 
-    // Button handlers
-    const runBtn=$('run'), resetBtn=$('reset');
-    if (runBtn) {
-      runBtn.addEventListener('click',()=>{
-        const results = calculate();
-        if (results) {
-          render(results);
-        }
-      });
-    }
-    
-    if (resetBtn) {
-      resetBtn.addEventListener('click',()=>{
-        try {
-          localStorage.removeItem('futurecalc_inputs'); 
-          location.reload();
-        } catch(e) {
-          console.warn('Reset failed:', e);
-          // Fallback: just clear the form
-          fields.forEach(f => {
-            const el = $(f);
-            if (el) {
-              if (el.type === 'checkbox') {
-                el.checked = f === 'redirect'; // Default redirect to true
-              } else {
-                el.value = '';
-              }
-            }
-          });
-        }
-      });
-    }
+/* ========= Crypto ========= */
+function parseSeries(text){
+	const vals = text.split(/[\s,]+/).map(v=>+v).filter(v=>isFinite(v) && v>0);
+	return vals.length ? vals : null;
+}
+function simulateSeries(n, driftA=0.10, volA=0.60, start=100){
+	const mu = driftA, sigma = volA;
+	const mu_p = mu / n, sig_p = sigma / Math.sqrt(n);
+	let p = start, arr=[p];
+	for (let k=1;k<n;k++){
+		const z = Math.max(-4, Math.min(4, (Math.random()*2-1) + (Math.random()*2-1)));
+		p = p * Math.exp((mu_p - 0.5*sig_p*sig_p) + sig_p*z);
+		arr.push(Math.max(0.01, p));
+	}
+	return arr;
+}
+function dca(cAmt, freq, years, feePct, series){
+	const N = Math.round(freq*years);
+	const prices = series && series.length>=N ? series.slice(0,N)
+		: (series && series.length>0 ? [...series, ...Array(N-series.length).fill(series.at(-1))] : simulateSeries(N, 0.10, 0.60, 100));
+	let units=0, cost=0, fees=0, rows=[['Period','Price','Buy $','Fee $','Units','Cum Units','Cum Cost','Portfolio $','Contrib $']];
+	for (let i=0;i<N;i++){
+	 const price = prices[i];
+	 const fee = cAmt * (feePct/100);
+	 const buy = Math.max(0, cAmt - fee);
+	 const u = buy / price;
+	 units += u;
+	 cost += buy;
+	 fees += fee;
+	 const portfolio = units * price;
+	 const contributed = cost + fees;
+	 rows.push([i+1, price, buy, fee, u, units, contributed, portfolio, contributed]);
+	}
+	const endValue = rows.at(-1)[7];
+	const mdd = (()=>{ let peak=0, m=0; for (let i=1;i<rows.length;i++){ const v=rows[i][7]; peak=Math.max(peak,v); m=Math.max(m, peak? (peak-v)/peak:0);} return m; })();
+	return {rows, endValue, mdd};
+}
+function renderCryptoChart(rows){
+	const labels = rows.slice(1).map(r=>`P${r[0]}`);
+	const value = rows.slice(1).map(r=>r[7]);
+	const contrib = rows.slice(1).map(r=>r[8]);
+	const cv = document.getElementById('cryptoChart'); if(!cv) return;
+	const ctx = cv.getContext('2d'); if(!ctx) return;
+	if (cryptoChart){ try{cryptoChart.destroy();}catch(e){} cryptoChart=null; }
+	cryptoChart = new Chart(ctx,{
+		type:'line',
+		data:{labels,
+			datasets:[
+				{label:'Portfolio value', data:value, borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2},
+				{label:'Total contributions', data:contrib, borderColor:getVar('--green'), backgroundColor:getVar('--greenFill'), fill:true, tension:.2}
+			]},
+		options:{responsive:true,maintainAspectRatio:false,
+			plugins:{legend:{labels:{color:getVar('--muted')}}},
+			scales:{x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},
+			        y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}},
+			elements:{point:{radius:0}}
+		}
+	});
+}
+function runCrypto(){
+	const cAmt = +document.getElementById('cAmt').value||0;
+	const freq = +document.getElementById('cFreq').value||26;
+	const years= +document.getElementById('cYears').value||5;
+	const fee  = +document.getElementById('cFee').value||0;
+	const series = parseSeries(document.getElementById('cSeries').value);
+	const st = document.getElementById('statusCrypto');
+	if (cAmt<=0 || years<=0){ st.textContent='Enter valid inputs'; return; }
+	st.textContent = 'Calculating…';
+	const {rows, endValue, mdd} = dca(cAmt, freq, years, fee, series);
+	const last = rows.at(-1);
+	const units = last[5];
+	const avgCost = last[6]/Math.max(1, units);
+	document.getElementById('cUnits').textContent = units.toFixed(6);
+	document.getElementById('cAvgCost').textContent = fmt(avgCost);
+	document.getElementById('cEndValue').textContent = fmt(endValue);
+	document.getElementById('cMdd').textContent = (mdd*100).toFixed(1) + '%';
+	document.getElementById('exportCrypto').onclick = ()=> FC.downloadCSV('crypto_dca.csv', FC.toCSV(rows));
+	renderCryptoChart(rows);
+	st.textContent = 'Done';
+}
 
-    // Auto-run if we have basic inputs
-    const grossEl = $('gross');
-    const expensesEl = $('monthlyExpenses');
-    if (grossEl?.value && expensesEl?.value) {
-      setTimeout(() => {
-        const results = calculate();
-        if (results) {
-          render(results);
-        }
-      }, 100); // Small delay to ensure everything is loaded
-    }
-  });
-</script>
+/* ========= DOM Ready ========= */
+document.addEventListener('DOMContentLoaded', ()=>{
+	DOM_READY = true;
+
+	const btn = $('themeBtn'); if (btn) btn.addEventListener('click', cycleTheme);
+	initTheme();
+	initNav();
+
+	// Input persistence (Paycheck)
+	const fields=['gross','frequency','years','investPct','savePct','annualReturn','savingsApy','monthlyExpenses','redirect'];
+	function saveInputs(){ try{ const d={}; fields.forEach(f=>{ const el=$(f); if(el) d[f]=el.type==='checkbox'?el.checked:el.value; }); localStorage.setItem('futurecalc_inputs',JSON.stringify(d)); }catch(e){} }
+	function loadInputs(){ try{ const raw=localStorage.getItem('futurecalc_inputs'); if(!raw) return; const d=JSON.parse(raw); fields.forEach(f=>{ if(d[f]!==undefined){ const el=$(f); if(el){ if(el.type==='checkbox') el.checked=d[f]; else el.value=d[f]; }}});}catch(e){} }
+	fields.forEach(f=>{ const el=$(f); if(el){ el.addEventListener('input',saveInputs); el.addEventListener('change',saveInputs);} });
+	loadInputs();
+
+	function syncPair(numId, sliderId){ const num=$(numId), rng=$(sliderId); if(!num||!rng) return; num.addEventListener('input',()=>{rng.value=num.value;}); rng.addEventListener('input',()=>{num.value=rng.value;}); }
+	syncPair('investPct','investSlider'); syncPair('savePct','saveSlider');
+
+	const runBtn=$('run'), resetBtn=$('reset');
+	if (runBtn) runBtn.addEventListener('click',()=>{ const results=calculate(); if(results) render(results); });
+	if (resetBtn) resetBtn.addEventListener('click',()=>{ try{ localStorage.removeItem('futurecalc_inputs'); location.reload(); }catch(e){ fields.forEach(f=>{ const el=$(f); if(el){ if(el.type==='checkbox') el.checked=(f==='redirect'); else el.value=''; }}); } });
+
+	// Auto-run if basic inputs exist
+	if ($('gross')?.value && $('monthlyExpenses')?.value) { setTimeout(()=>{ const results=calculate(); if(results) render(results); },100); }
+
+	// Debt
+	const container = document.getElementById('debts');
+	if (container){ document.getElementById('addDebt').addEventListener('click',()=>addDebtRow(container)); addDebtRow(container); document.getElementById('runDebt').addEventListener('click', runDebt); }
+
+	// Mortgage
+	if (document.getElementById('runMortgage')) document.getElementById('runMortgage').addEventListener('click', runMortgage);
+
+	// Crypto
+	if (document.getElementById('runCrypto')) document.getElementById('runCrypto').addEventListener('click', runCrypto);
+});
+	</script>
 </body>
 </html>
