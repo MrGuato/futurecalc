@@ -102,8 +102,23 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 .calc-sec{display:none}
 .calc-sec.active{display:block}
 
+/* Disclaimer banner at bottom */
+.disclaimer-banner{
+	width:100%;
+	background:var(--card);
+	border-top:1px solid var(--line);
+	color:var(--muted);
+	font-size:11px;
+	padding:10px 16px;
+	text-align:center;
+	margin-top:8px;
+}
+
 /* Edge-to-edge feel on small screens */
-@media (max-width:480px){.wrap{padding-left:8px;padding-right:8px}.card{border-radius:12px}}
+@media (max-width:480px){
+	.wrap{padding-left:8px;padding-right:8px}
+	.card{border-radius:12px}
+}
 	</style>
 </head>
 <body>
@@ -437,6 +452,10 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 			</section>
 
 		</div>
+	</div>
+
+	<div class="disclaimer-banner" role="note">
+		FutureCalc is an educational tool only and does not provide financial, investment, tax, or legal advice. Please consult a qualified professional before making financial decisions.
 	</div>
 
 	<!-- Chart.js (CDN) -->
