@@ -23,7 +23,7 @@ jobs:
 
 
       - name: Super-Linter
-        uses: super-linter/super-linter@v8.1.0
+        uses: super-linter/super-linter@v8.3.1
         env:
           LINTER_RULES_PATH: linters/
           VALIDATE_HTML: true
