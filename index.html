@@ -36,10 +36,12 @@
 }
 
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}
-header{padding:28px 18px 8px;text-align:center;position:relative}
-header h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,32px)}
-header p{margin:0;color:var(--muted)}
+html,body{margin:0;background:radial-gradient(circle at top, color-mix(in oklab, var(--accent) 12%, var(--bg)) 0%, var(--bg) 32%);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5;min-height:100%}
+header{padding:40px 18px 14px;text-align:center;position:relative}
+header h1{margin:0 0 8px;font-size:clamp(26px,3vw,38px);letter-spacing:-0.02em}
+header p{margin:0 auto;color:var(--muted);max-width:760px}
+
+.hero-badge{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:999px;background:color-mix(in oklab,var(--card) 86%,var(--accent) 14%);border:1px solid color-mix(in oklab,var(--line) 78%,var(--accent) 22%);font-size:12px;color:var(--muted);margin-bottom:14px}
 
 /* Slightly narrower than full width, percentage based */
 .wrap{
@@ -56,7 +58,7 @@ header p{margin:0;color:var(--muted)}
 @media (min-width:1400px){.grid{grid-template-columns:1fr 1fr}}
 */
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card{background:color-mix(in oklab,var(--card) 95%, var(--accent) 5%);border:1px solid color-mix(in oklab,var(--line) 75%, var(--accent) 25%);border-radius:18px;padding:18px;box-shadow:0 10px 28px rgba(6,16,36,.07)}
 .card h2{margin:0 0 12px;font-size:18px}
 label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
 .row{display:flex;gap:10px}
@@ -69,7 +71,7 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 
 /* Stats full width */
 .stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:8px}
-.stat{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat{background:linear-gradient(165deg,color-mix(in oklab,var(--chip) 90%,var(--card) 10%),var(--chip));border:1px solid var(--line);border-radius:14px;padding:12px}
 .stat .k{font-size:12px;color:var(--muted)}
 .stat .v{font-size:18px;margin-top:4px}
 .right{display:flex;justify-content:space-between;flex-wrap:wrap}
@@ -93,19 +95,20 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 .tooltip{cursor:help;border-bottom:1px dotted var(--muted)}
 
 /* Theme button */
-#themeBtn{position:absolute;top:16px;right:16px;width:34px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;cursor:pointer;user-select:none}
+#themeBtn{position:absolute;top:16px;right:16px;width:34px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line);background:color-mix(in oklab,var(--card) 82%,var(--accent) 18%);color:var(--ink);font-size:14px;cursor:pointer;user-select:none}
 #themeBtn:hover{box-shadow:0 0 0 3px var(--chip) inset}
 
 /* Segmented control + section visibility */
-.seg{appearance:none;border:0;margin:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
-.seg.active{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line) inset}
+.seg{appearance:none;border:0;margin:0;background:transparent;color:var(--muted);padding:9px 14px;border-radius:10px;cursor:pointer;font-weight:700;letter-spacing:.01em;transition:all .2s ease}
+.seg.active{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line) inset,0 8px 20px rgba(6,16,36,.08)}
+.seg:hover{background:color-mix(in oklab,var(--chip) 75%,var(--accent) 25%);color:var(--ink)}
 .calc-sec{display:none}
 .calc-sec.active{display:block}
 
 /* Disclaimer banner at bottom */
 .disclaimer-banner{
 	width:100%;
-	background:var(--card);
+	background:color-mix(in oklab,var(--card) 93%,var(--accent) 7%);
 	border-top:1px solid var(--line);
 	color:var(--muted);
 	font-size:11px;
@@ -119,17 +122,23 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 	.wrap{padding-left:8px;padding-right:8px}
 	.card{border-radius:12px}
 }
+
+.top-tabs{margin-top:10px;display:flex;justify-content:center;padding:0 12px}
+.tab-shell{display:inline-flex;background:color-mix(in oklab,var(--chip) 84%, var(--accent) 16%);border:1px solid var(--line);border-radius:14px;padding:5px;backdrop-filter:blur(8px)}
+
+.title-accent{background:linear-gradient(90deg,var(--accent),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
 	</style>
 </head>
 <body>
 	<header>
-		<h1>FutureCalc</h1>
+		<div class="hero-badge">🚀 Financial clarity, one paycheck at a time</div>
+		<h1><span class="title-accent">FutureCalc</span></h1>
 		<p>Split your paycheck, build a 6-month emergency fund, and watch compounding work for you.</p>
 		<button id="themeBtn" type="button" aria-label="Theme: Auto" title="Theme: Auto">A</button>
 	</header>
 
-	<div style="margin-top:10px;display:flex;justify-content:center">
-		<div id="nav" role="tablist" aria-label="Calculators" style="display:inline-flex;background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:4px">
+	<div class="top-tabs">
+		<div id="nav" class="tab-shell" role="tablist" aria-label="Calculators">
 			<button class="seg active" role="tab" aria-selected="true" data-target="sec-paycheck">Paycheck</button>
 			<button class="seg" role="tab" aria-selected="false" data-target="sec-debt">Debt</button>
 			<button class="seg" role="tab" aria-selected="false" data-target="sec-mortgage">Mortgage</button>
