@@ -143,6 +143,7 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 			<button class="seg" role="tab" aria-selected="false" data-target="sec-debt">Debt</button>
 			<button class="seg" role="tab" aria-selected="false" data-target="sec-mortgage">Mortgage</button>
 			<button class="seg" role="tab" aria-selected="false" data-target="sec-crypto">Crypto</button>
+			<button class="seg" role="tab" aria-selected="false" data-target="sec-compare">Compare</button>
 		</div>
 	</div>
 
@@ -460,6 +461,54 @@ input[type="checkbox"]{width:auto;transform:translateY(2px)}
 				</section>
 			</section>
 
+			<!-- Comparison Lab -->
+			<section id="sec-compare" class="calc-sec">
+				<section class="card">
+					<h2>Scenario Comparison Lab</h2>
+					<div class="help">Compare two paycheck plans side-by-side and see which reaches your goals faster.</div>
+					<div class="row">
+						<div class="mini">
+							<div class="box"><div class="k">Scenario A label</div><div class="v"><input id="cmpNameA" type="text" value="Balanced"/></div></div>
+							<div class="box"><div class="k">Invest %</div><div class="v"><input id="cmpInvestA" type="number" min="0" max="100" step="0.1" value="15"/></div></div>
+							<div class="box"><div class="k">Save %</div><div class="v"><input id="cmpSaveA" type="number" min="0" max="100" step="0.1" value="10"/></div></div>
+						</div>
+						<div class="mini">
+							<div class="box"><div class="k">Scenario B label</div><div class="v"><input id="cmpNameB" type="text" value="Aggressive"/></div></div>
+							<div class="box"><div class="k">Invest %</div><div class="v"><input id="cmpInvestB" type="number" min="0" max="100" step="0.1" value="22"/></div></div>
+							<div class="box"><div class="k">Save %</div><div class="v"><input id="cmpSaveB" type="number" min="0" max="100" step="0.1" value="8"/></div></div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div><label>Gross paycheck</label><input id="cmpGross" type="number" min="0" step="0.01" placeholder="e.g., 2000"/></div>
+						<div><label>Monthly expenses</label><input id="cmpExpenses" type="number" min="0" step="1" placeholder="e.g., 2500"/></div>
+					</div>
+					<div class="row">
+						<div><label>Pay frequency</label><select id="cmpFreq"><option value="52">Weekly</option><option value="26" selected>Bi-weekly</option><option value="24">Semi-monthly</option><option value="12">Monthly</option></select></div>
+						<div><label>Projection years</label><input id="cmpYears" type="number" min="1" max="60" value="30"/></div>
+					</div>
+					<div class="row">
+						<div><label>Annual return %</label><input id="cmpReturn" type="number" min="0" max="20" step="0.1" value="9"/></div>
+						<div><label>Savings APY %</label><input id="cmpApy" type="number" min="0" max="10" step="0.1" value="0.5"/></div>
+					</div>
+					<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+						<button type="button" class="btn" id="runCompare">Compare plans</button>
+						<span class="tag" id="statusCompare" role="status" aria-live="polite">Ready</span>
+					</div>
+				</section>
+				<section class="card">
+					<h2>Comparison Results</h2>
+					<div class="stats">
+						<div class="stat"><div class="k">Better end investing</div><div class="v" id="cmpWinnerInvest">—</div></div>
+						<div class="stat"><div class="k">Faster EF completion</div><div class="v" id="cmpWinnerEf">—</div></div>
+						<div class="stat"><div class="k">Scenario A end value</div><div class="v" id="cmpEndA">$0</div></div>
+						<div class="stat"><div class="k">Scenario B end value</div><div class="v" id="cmpEndB">$0</div></div>
+					</div>
+					<div class="divider"></div>
+					<div class="chart-box"><canvas id="compareChart"></canvas></div>
+				</section>
+			</section>
+
 		</div>
 	</div>
 
@@ -490,7 +539,7 @@ const getVar=(name)=> {
 	return name.includes('blue') ? '#2f6cf6' : name.includes('green') ? '#16a34a' : '#9fb2cc';
 };
 
-let chart = null, debtChart = null, mortgageChart = null, cryptoChart = null;
+let chart = null, debtChart = null, mortgageChart = null, cryptoChart = null, compareChart = null;
 let DOM_READY = false;
 
 /* ========= Theme handling ========= */
@@ -517,7 +566,7 @@ function applyTheme(mode){
 		cht.update('none');
 	};
 	if (DOM_READY && window.Chart){
-		repaint(chart); repaint(debtChart); repaint(mortgageChart); repaint(cryptoChart);
+		repaint(chart); repaint(debtChart); repaint(mortgageChart); repaint(cryptoChart); repaint(compareChart);
 	}
 }
 function initTheme(){
@@ -538,21 +587,10 @@ function cycleTheme(){
 }
 
 /* ========= Paycheck ========= */
-function calculate(){
-	const gross=+($('gross')?.value||0);
-	const periodsPerYear=+($('frequency')?.value||26);
-	const years=+($('years')?.value||30);
-	const investPct=Math.min(100,Math.max(0,+($('investPct')?.value||0)))/100;
-	const savePct=Math.min(100,Math.max(0,+($('savePct')?.value||0)))/100;
-	const annualReturn=Math.max(0,+($('annualReturn')?.value||0))/100;
-	const savingsApy=Math.max(0,+($('savingsApy')?.value||0))/100;
-	const monthlyExpenses=+($('monthlyExpenses')?.value||0);
-	const redirect=$('redirect')?.checked ?? true;
-
-	setStatus('Calculating…');
-	if (!gross || gross <= 0) { setStatus('Enter a valid paycheck amount'); return null; }
-	if (!((investPct+savePct) > 0)) { setStatus('Enter investment or savings percentages'); return null; }
-	if (!years || years <= 0) { setStatus('Enter valid projection years'); return null; }
+function projectPaycheck({gross, periodsPerYear, years, investPct, savePct, annualReturn, savingsApy, monthlyExpenses, redirect=true}){
+	if (!gross || gross <= 0) return null;
+	if (!((investPct+savePct) > 0)) return null;
+	if (!years || years <= 0) return null;
 
 	const efGoal = monthlyExpenses>0 ? monthlyExpenses*6 : 0;
 	const totalP = Math.round(years*periodsPerYear);
@@ -599,6 +637,25 @@ function calculate(){
 	}
 
 	return {inv, sav, efGoal, efAt, invP, savP, periodsPerYear, years, invContrib, invGrowth, savContrib, savGrowth, investMilestones};
+}
+
+function calculate(){
+	const gross=+($('gross')?.value||0);
+	const periodsPerYear=+($('frequency')?.value||26);
+	const years=+($('years')?.value||30);
+	const investPct=Math.min(100,Math.max(0,+($('investPct')?.value||0)))/100;
+	const savePct=Math.min(100,Math.max(0,+($('savePct')?.value||0)))/100;
+	const annualReturn=Math.max(0,+($('annualReturn')?.value||0))/100;
+	const savingsApy=Math.max(0,+($('savingsApy')?.value||0))/100;
+	const monthlyExpenses=+($('monthlyExpenses')?.value||0);
+	const redirect=$('redirect')?.checked ?? true;
+
+	setStatus('Calculating…');
+	const result = projectPaycheck({gross, periodsPerYear, years, investPct, savePct, annualReturn, savingsApy, monthlyExpenses, redirect});
+	if (!gross || gross <= 0) { setStatus('Enter a valid paycheck amount'); return null; }
+	if (!((investPct+savePct) > 0)) { setStatus('Enter investment or savings percentages'); return null; }
+	if (!years || years <= 0) { setStatus('Enter valid projection years'); return null; }
+	return result;
 }
 const yearLabels=(n)=>Array.from({length:n+1},(_,i)=>`Year ${i}`);
 
@@ -1000,6 +1057,54 @@ async function runCrypto(){
 	st.textContent = 'Done';
 }
 
+
+
+/* ========= Comparison Lab ========= */
+function runComparisonLab(){
+	const st = document.getElementById('statusCompare');
+	const readPct = (id)=>Math.min(100,Math.max(0, +(document.getElementById(id)?.value||0)))/100;
+	const gross = +(document.getElementById('cmpGross')?.value||0);
+	const monthlyExpenses = +(document.getElementById('cmpExpenses')?.value||0);
+	const periodsPerYear = +(document.getElementById('cmpFreq')?.value||26);
+	const years = +(document.getElementById('cmpYears')?.value||30);
+	const annualReturn = Math.max(0, +(document.getElementById('cmpReturn')?.value||0))/100;
+	const savingsApy = Math.max(0, +(document.getElementById('cmpApy')?.value||0))/100;
+	const nameA = (document.getElementById('cmpNameA')?.value || 'Scenario A').trim();
+	const nameB = (document.getElementById('cmpNameB')?.value || 'Scenario B').trim();
+	const investA = readPct('cmpInvestA'), saveA = readPct('cmpSaveA');
+	const investB = readPct('cmpInvestB'), saveB = readPct('cmpSaveB');
+	if (!gross || years<=0){ st.textContent='Enter gross paycheck and years'; return; }
+	st.textContent = 'Comparing…';
+	const a = projectPaycheck({gross, periodsPerYear, years, investPct:investA, savePct:saveA, annualReturn, savingsApy, monthlyExpenses, redirect:true});
+	const b = projectPaycheck({gross, periodsPerYear, years, investPct:investB, savePct:saveB, annualReturn, savingsApy, monthlyExpenses, redirect:true});
+	if (!a || !b){ st.textContent='Check scenario percentages'; return; }
+
+	document.getElementById('cmpEndA').textContent = `${nameA}: ${fmt(a.inv)}`;
+	document.getElementById('cmpEndB').textContent = `${nameB}: ${fmt(b.inv)}`;
+	document.getElementById('cmpWinnerInvest').textContent = a.inv===b.inv ? 'Tie' : (a.inv>b.inv ? nameA : nameB);
+	const efA = a.efAt===Infinity ? Number.POSITIVE_INFINITY : a.efAt;
+	const efB = b.efAt===Infinity ? Number.POSITIVE_INFINITY : b.efAt;
+	document.getElementById('cmpWinnerEf').textContent = efA===efB ? 'Tie' : (efA<efB ? nameA : nameB);
+
+	const lineFrom=(arr)=>{ const out=[]; for(let y=0;y<=years;y++){ const i=y*periodsPerYear; out.push(arr[i]||0); } return out; };
+	const cv=document.getElementById('compareChart');
+	if (cv && window.Chart){
+		const ctx=cv.getContext('2d');
+		if (compareChart){ try{compareChart.destroy();}catch(e){} compareChart=null; }
+		compareChart=new Chart(ctx,{
+			type:'line',
+			data:{labels:yearLabels(years), datasets:[
+				{label:`${nameA} investing`, data:lineFrom(a.invP), borderColor:getVar('--blue'), backgroundColor:getVar('--blueFill'), fill:true, tension:.2},
+				{label:`${nameB} investing`, data:lineFrom(b.invP), borderColor:getVar('--green'), backgroundColor:getVar('--greenFill'), fill:true, tension:.2}
+			]},
+			options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getVar('--muted')}}},
+				scales:{x:{ticks:{color:getVar('--muted')},grid:{color:getVar('--gridSoft')}},y:{ticks:{color:getVar('--muted'),callback:(v)=>'$'+Intl.NumberFormat().format(v)},grid:{color:getVar('--gridSoft')}}},
+				elements:{point:{radius:0}}
+			}
+		});
+	}
+	st.textContent = 'Done';
+}
 /* ========= DOM Ready ========= */
 document.addEventListener('DOMContentLoaded', ()=>{
 	DOM_READY = true;
@@ -1034,6 +1139,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 	// Crypto
 	if (document.getElementById('runCrypto')) document.getElementById('runCrypto').addEventListener('click', runCrypto);
+
+	// Comparison lab
+	if (document.getElementById('runCompare')) document.getElementById('runCompare').addEventListener('click', runComparisonLab);
 
 	// Crypto API key wiring
 	const keyInput = document.getElementById('cgApiKey');
